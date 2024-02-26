@@ -60,15 +60,15 @@ def segment(im, *, method: str = "otsu", channel: str = "saturation", ksize: T.O
 
     stats = {
         
-        'median-intensity': np.median(V),
-        'mean-intensity': np.mean(V),
-        'stddev-intensity': np.std(V),
-        'median-saturation': np.median(S),
-        'mean-saturation': np.mean(S),
-        'stddev-saturation': np.std(S),
-        'median-hue': np.median(H),
-        'mean-hue': np.mean(H),
-        'stddev-hue': np.std(H),
+        'median-intensity': float(np.median(V)),
+        'mean-intensity': float(np.mean(V)),
+        'stddev-intensity': float(np.std(V)),
+        'median-saturation': float(np.median(S)),
+        'mean-saturation': float(np.mean(S)),
+        'stddev-saturation': float(np.std(S)),
+        'median-hue': float(np.median(H)),
+        'mean-hue': float(np.mean(H)),
+        'stddev-hue': float(np.std(H)),
         'seg-absolute-size': len(V),
         'seg-relative-size': len(V) / float( hsv_im.shape[0] * hsv_im.shape[1] ),
         
@@ -76,10 +76,10 @@ def segment(im, *, method: str = "otsu", channel: str = "saturation", ksize: T.O
         'c-area': cv2.contourArea(largest_contour),
 
         # compute bounding box
-        'c-xmin': np.amin( largest_contour[:, 0, 0] ),
-        'c-xmax': np.amax( largest_contour[:, 0, 0] ),
-        'c-ymin': np.amin( largest_contour[:, 0, 1] ),
-        'c-ymax': np.amax( largest_contour[:, 0, 1] ),
+        'c-xmin': int(np.amin( largest_contour[:, 0, 0] )),
+        'c-xmax': int(np.amax( largest_contour[:, 0, 0] )),
+        'c-ymin': int(np.amin( largest_contour[:, 0, 1] )),
+        'c-ymax': int(np.amax( largest_contour[:, 0, 1] )),
 
     }
 

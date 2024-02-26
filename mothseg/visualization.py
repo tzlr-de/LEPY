@@ -35,8 +35,10 @@ def plot(ims, contour, stats, pois: T.Optional[PointsOfInterest] = None):
         if pois is not None:
             for name, poi in pois:
                 ax.scatter(poi.col, poi.row, color='r')
-    plt.show()
-    plt.close()
+    plt.tight_layout()
+    return fig
+    # plt.show()
+    # plt.close()
 
 
 def plot_interm(im, interm, px_per_mm=None):
@@ -93,7 +95,8 @@ def plot_interm(im, interm, px_per_mm=None):
                 f"{px_per_mm:.2f} px/mm",
                 f"Image size: {size[0]:.2f} x {size[1]:.2f}mm"
             ]))
-
+        
     plt.tight_layout()
-    plt.show()
-    plt.close()
+    return fig 
+    # plt.show()
+    # plt.close()

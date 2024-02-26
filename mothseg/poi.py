@@ -40,6 +40,8 @@ class Point:
 
 @dataclass
 class PointsOfInterest:
+    width: int
+    height: int
     center: Point
     outer_l: Point
     outer_r: Point
@@ -52,9 +54,32 @@ class PointsOfInterest:
         yield "outer_r", self.outer_r
         yield "inner_l", self.inner_l
         yield "inner_r", self.inner_r
+    
+    @property
+    def stats(self):
+        return {
+            "poi-orig_width": int(self.width),
+            "poi-orig_height": int(self.height),
+
+            "poi-center-x": int(self.center.col),
+            "poi-center-y": int(self.center.row),
+            
+            "poi-outer_l-x": int(self.outer_l.col),
+            "poi-outer_l-y": int(self.outer_l.row),
+
+            "poi-outer_r-x": int(self.outer_r.col),
+            "poi-outer_r-y": int(self.outer_r.row),
+            
+            "poi-inner_l-x": int(self.inner_l.col),
+            "poi-inner_l-y": int(self.inner_l.row),
+            
+            "poi-inner_r-x": int(self.inner_r.col),
+            "poi-inner_r-y": int(self.inner_r.row),
+        }
 
     @classmethod
     def detect(cls, bin_im: np.ndarray) -> PointsOfInterest:
+        H, W, *C = bin_im.shape
         middle = split_picture(bin_im)
     
         binary_left = bin_im[:, :middle]
@@ -80,6 +105,7 @@ class PointsOfInterest:
         outer_pix_r = outer_pix_r + Point(0, middle)
 
         return PointsOfInterest(
+            width=W, height=H,
             center=body_center,
             outer_l=outer_pix_l,
             outer_r=outer_pix_r,
