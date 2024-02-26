@@ -12,3 +12,8 @@ python -m pip install -r requirements.txt
 ```bash
 ./main.py <image_folder> config.yml --rescale .5 -y
 ```
+
+## Examples
+| Example 1 | Example 2  |
+|---|---|
+| <img src="examples/example1.png"> | <img src="examples/example2.png"> |
