@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-from __future__ import annotations
 
 if __name__ != '__main__':
     raise Exception("Do not import me!")
@@ -45,8 +44,8 @@ def main(args):
             logging.info("Execution aborted by the user!")
             return -1
 
-
-    writer = mothseg.OutputWriter(output)
+    
+    writer = mothseg.OutputWriter(output, config=args.config)
 
     for i, impath in enumerate(tqdm(images)):
         np.random.seed(1)
@@ -71,7 +70,7 @@ def main(args):
                 logging.error(f"Unsupported position: {config.calibration.position}")
                 return -3
 
-            crop_x, crop_y = size = (config.calibration.rel_width, config.calibration.rel_height)
+            size = (config.calibration.rel_width, config.calibration.rel_height)
             cal_length, interm = scalebar.get_scale(im, 
                                                     cv2_corners=True,
                                                     pos=pos,

@@ -1,6 +1,8 @@
 import json
 import csv
+import shutil
 
+from matplotlib import pyplot as plt
 from pathlib import Path
 
 from mothseg import PointsOfInterest
@@ -9,10 +11,13 @@ from mothseg import visualization as vis
 
 class OutputWriter:
 
-    def __init__(self, folder: str, *, store_to_csv: bool = True) -> None:
+    def __init__(self, folder: str, *, store_to_csv: bool = True, config = None) -> None:
         self.root = Path(folder)
 
         self.root.mkdir(exist_ok=True, parents=True)
+
+        shutil.copy(config, self.root / Path(config).name)
+
         self.csv = None
         if store_to_csv: 
             self._csv_file = open(self.root / "stats.csv", "w")
@@ -64,9 +69,11 @@ class OutputWriter:
         dest = self.new_path(impath, ".png")
         fig = vis.plot(ims, contour, stats, pois=pois)
         fig.savefig(dest)
+        plt.close()
 
 
     def plot_interm(self, impath: str, im, interm, cal_length):
         dest = self.new_path(impath, "_interm.png")
         fig = vis.plot_interm(im, interm, cal_length)
         fig.savefig(dest)
+        plt.close()
