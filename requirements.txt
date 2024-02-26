@@ -1,0 +1,7 @@
+matplotlib
+tqdm
+pyyaml
+munch
+
+scalebar~=0.2.0
+cvargparse
