@@ -18,7 +18,7 @@ def find_images(folder, *, ordered: bool = True, extensions=[".jpg", ".png"]):
     res = []
     for root, folders, fnames in os.walk(folder):
         for name in fnames:
-            if Path(name).suffix.lower() not in extensions:
+            if Path(name).suffix.lower() not in extensions or name.startswith("."):
                 continue
             res.append(Path(root) / name)
 
