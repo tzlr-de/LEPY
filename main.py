@@ -21,6 +21,55 @@ from mothseg import utils
 def proceed_check(yes: bool) -> bool:
     return yes or input("Do you want to proceed? [y/N] ").lower() == "y"
 
+
+def process(impath, config, writer: mothseg.OutputWriter, *, 
+            rescale: float,
+            show_interm: bool = False
+            ):
+
+    np.random.seed(1)
+    cv2.setRNGSeed(0)
+    im = imread(impath)
+    im = utils.rescale(im, rescale, channel_axis=2)
+
+    chan, stats, contour, bin_im = mothseg.segment(im, method=config.segmentation.method)
+
+    pois = None
+    if config.points_of_interest.enabled:
+        cont_arr = np.zeros_like(bin_im)
+        cont_arr = cv2.drawContours(cont_arr, [contour], 0, 1, -1)
+        pois = mothseg.PointsOfInterest.detect(cont_arr)
+
+        stats.update(pois.stats)
+
+    if config.calibration.enabled:
+        positions = {pos.name.lower(): pos for pos in scalebar.Position}
+        pos = positions.get(config.calibration.position)
+        if pos is None:
+            logging.error(f"Unsupported position: {config.calibration.position}")
+            return -3
+
+        size = (config.calibration.rel_width, config.calibration.rel_height)
+        cal_length, interm = scalebar.get_scale(im, 
+                                                cv2_corners=True,
+                                                pos=pos,
+                                                crop_size=size, 
+                                                return_intermediate=True,
+                                                binarize=True,
+                                        )
+        if show_interm:
+            writer.plot_interm(impath, im, interm, cal_length)
+        
+        if cal_length is not None and cal_length > 0:
+            stats['c-area-calibrated'] = stats['c-area'] / cal_length ** 2
+            stats['width-calibrated'] = (stats['c-xmax'] - stats['c-xmin']) / cal_length
+            stats['height-calibrated'] = (stats['c-ymax'] - stats['c-ymin']) / cal_length
+            stats['calibration-length'] = cal_length
+
+    writer(impath, stats)
+    writer.plot(impath, [im, bin_im, chan], contour, stats, pois=pois)
+
+
 def main(args):
     config = utils.read_config(args.config)
     images = utils.find_images(args.folder)
@@ -33,7 +82,7 @@ def main(args):
         logging.info("Execution aborted by the user!")
         return -1
     
-    output = utils.check_output(args.output)
+    output = utils.check_output(args, use_timestamp=False)
 
     if output is None:
         logging.info("No output folder selected, exiting script.")
@@ -48,48 +97,16 @@ def main(args):
     writer = mothseg.OutputWriter(output, config=args.config)
 
     for i, impath in enumerate(tqdm(images)):
-        np.random.seed(1)
-        cv2.setRNGSeed(0)
-        im = imread(impath)
-        im = utils.rescale(im, args.rescale, channel_axis=2)
+        try:
+            process(impath, config, writer=writer,
+                    rescale=args.rescale,
+                    show_interm=args.show_interm,
+                )
+        except KeyboardInterrupt:
+            raise
+        except Exception as e:
+            writer.log_fail(impath, err=e)
 
-        chan, stats, contour, bin_im = mothseg.segment(im, method=config.segmentation.method)
-
-        pois = None
-        if config.points_of_interest.enabled:
-            cont_arr = np.zeros_like(bin_im)
-            cont_arr = cv2.drawContours(cont_arr, [contour], 0, 1, -1)
-            pois = mothseg.PointsOfInterest.detect(cont_arr)
-
-            stats.update(pois.stats)
-
-        if config.calibration.enabled:
-            positions = {pos.name.lower(): pos for pos in scalebar.Position}
-            pos = positions.get(config.calibration.position)
-            if pos is None:
-                logging.error(f"Unsupported position: {config.calibration.position}")
-                return -3
-
-            size = (config.calibration.rel_width, config.calibration.rel_height)
-            cal_length, interm = scalebar.get_scale(im, 
-                                                    cv2_corners=True,
-                                                    pos=pos,
-                                                    crop_size=size, 
-                                                    return_intermediate=True,
-                                                    binarize=True,
-                                          )
-            if args.show_interm:
-                writer.plot_interm(impath, im, interm, cal_length)
-            
-            if cal_length is not None and cal_length > 0:
-                stats['c-area-calibrated'] = stats['c-area'] / cal_length ** 2
-                stats['width-calibrated'] = (stats['c-xmax'] - stats['c-xmin']) / cal_length
-                stats['height-calibrated'] = (stats['c-ymax'] - stats['c-ymin']) / cal_length
-                stats['calibration-length'] = cal_length
-
-        writer(impath, stats)
-        writer.plot(impath, [im, bin_im, chan], contour, stats, pois=pois)
-        
 
 
 exit(main(parser.parse_args()))

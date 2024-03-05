@@ -31,11 +31,16 @@ def read_config(path) -> munch.Munch:
     with open(path) as f:
         return munch.munchify(yaml.safe_load(f))
     
-def check_output(folder):
+def check_output(args, *, use_timestamp: bool = True):
+    folder = args.output
     if folder is None:
-        folder = Path.cwd() / f"output/{dt.datetime.now():%Y-%m-%d_%H-%M-%S.%f}"
+        if use_timestamp:
+            folder = Path.cwd() / f"output/{dt.datetime.now():%Y-%m-%d_%H-%M-%S.%f}"
+        else:
+            src = Path(args.folder)
+            folder = src.parent / f"{src.name}_result"
 
-    elif Path(folder).exists():
+    if Path(folder).exists():
         logging.warning("Output folder already exists!")
         if input("Do you want save outputs into an existing folder? [y/N] ").lower() != "y":
             return None

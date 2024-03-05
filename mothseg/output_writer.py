@@ -1,6 +1,7 @@
 import json
 import csv
 import shutil
+import datetime as dt
 
 from matplotlib import pyplot as plt
 from pathlib import Path
@@ -45,9 +46,14 @@ class OutputWriter:
 
             self.csv.writerow(self.header)
             
+        self._err_file = open(self.root / "errors.log", "w")
+        
     def __del__(self):
         if hasattr(self, "_csv_file"):
             self._csv_file.close()
+
+        if hasattr(self, "_err_file"):
+            self._err_file.close()
     
     def new_path(self, impath: str, new_suffix: str):
         new_path = Path(impath).with_suffix(new_suffix).name
@@ -77,3 +83,10 @@ class OutputWriter:
         fig = vis.plot_interm(im, interm, cal_length)
         fig.savefig(dest)
         plt.close()
+    
+    def log_fail(self, impath: str, err: Exception):
+        if not hasattr(self, "_err_file"):
+            return
+        now = dt.datetime.now()
+        print(f"[{now:%Y-%m-%d %H:%M:%S}] Failed to process \"{impath}\". Reason ({type(err).__name__}): {str(err)}", file=self._err_file)
+        self._err_file.flush()
