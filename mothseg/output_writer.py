@@ -25,16 +25,24 @@ class OutputWriter:
             self.csv = csv.writer(self._csv_file, delimiter="\t")
             self.header = [
                 "Code",
+                "orig-image-width", "orig-image-height", "rescale-factor",
+                "image-width", "image-height",
 
                 "median-intensity", "mean-intensity", "stddev-intensity",
                 "median-saturation", "mean-saturation", "stddev-saturation", 
                 "median-hue", "mean-hue", "stddev-hue", 
 
-                "seg-absolute-size", "seg-relative-size", 
+                # "seg-absolute-size", "seg-relative-size", 
 
                 "c-length", "c-area", "c-xmin", "c-xmax", "c-ymin", "c-ymax", 
                 "c-area-calibrated", "width-calibrated", "height-calibrated",
                 "calibration-length",
+                
+                "poi-dist-center-outer_l",
+                "poi-dist-center-outer_r",
+                "poi-dist-inner-outer_l",
+                "poi-dist-inner-outer_r",
+                "poi-dist-inner",
 
                 "poi-orig_width", "poi-orig_height",
                 "poi-center-x", "poi-center-y",

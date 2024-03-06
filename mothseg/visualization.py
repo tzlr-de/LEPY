@@ -18,10 +18,8 @@ def plot(ims, contour, stats, pois: T.Optional[PointsOfInterest] = None):
         rx = [stats['c-xmin'], stats['c-xmax'], stats['c-xmax'], stats['c-xmin'], stats['c-xmin']]
         ry = [stats['c-ymin'], stats['c-ymin'], stats['c-ymax'], stats['c-ymax'], stats['c-ymin']]
         ax.plot(rx, ry, 'm--', linewidth=0.5)
-        ax.arrow(stats['c-xmin'], stats['c-ymax'], stats['c-xmax'] - stats['c-xmin'], 0, length_includes_head=True,
-                            width=3)
-        ax.arrow(stats['c-xmax'], stats['c-ymax'], -stats['c-xmax'] + stats['c-xmin'], 0, length_includes_head=True,
-                        width=3)
+        ax.annotate("", xy=(stats['c-xmin'], stats['c-ymax']), xytext=(stats['c-xmax'], stats['c-ymax']),
+                    arrowprops=dict(arrowstyle='<->'))
 
         if 'calibration-length' not in stats:
             lengthx = '{:.0f} pixels'.format(stats['c-xmax'] - stats['c-xmin'])
@@ -35,6 +33,19 @@ def plot(ims, contour, stats, pois: T.Optional[PointsOfInterest] = None):
         if pois is not None:
             for name, poi in pois:
                 ax.scatter(poi.col, poi.row, color='r')
+
+            for key, p0, p1 in pois.named_distances:
+                dist = stats[key]
+                unit = "px" if 'calibration-length' not in stats else "mm"
+                ax.annotate("", xy=(p0.col, p0.row), xytext=(p1.col, p1.row), 
+                            arrowprops=dict(arrowstyle='<->'))
+                ax.text(x=(p0.col + p1.col)/2, y=(p0.row + p1.row)/2 + 15, 
+                        s=f"{dist:.2f} {unit}",
+                        horizontalalignment='center', 
+                        verticalalignment='top', 
+                        fontsize=10,
+                )
+
     plt.tight_layout()
     return fig
     # plt.show()

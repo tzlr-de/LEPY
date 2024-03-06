@@ -30,18 +30,13 @@ def process(impath, config, writer: mothseg.OutputWriter, *,
     np.random.seed(1)
     cv2.setRNGSeed(0)
     im = imread(impath)
+    orig_im_H, orig_im_W, *_ = im.shape
     im = utils.rescale(im, rescale, channel_axis=2)
 
     chan, stats, contour, bin_im = mothseg.segment(im, method=config.segmentation.method)
+    stats.update({"orig-image-width": orig_im_W, "orig-image-height": orig_im_H, "rescale-factor": rescale})
 
-    pois = None
-    if config.points_of_interest.enabled:
-        cont_arr = np.zeros_like(bin_im)
-        cont_arr = cv2.drawContours(cont_arr, [contour], 0, 1, -1)
-        pois = mothseg.PointsOfInterest.detect(cont_arr)
-
-        stats.update(pois.stats)
-
+    cal_length = None
     if config.calibration.enabled:
         positions = {pos.name.lower(): pos for pos in scalebar.Position}
         pos = positions.get(config.calibration.position)
@@ -65,6 +60,15 @@ def process(impath, config, writer: mothseg.OutputWriter, *,
             stats['width-calibrated'] = (stats['c-xmax'] - stats['c-xmin']) / cal_length
             stats['height-calibrated'] = (stats['c-ymax'] - stats['c-ymin']) / cal_length
             stats['calibration-length'] = cal_length
+
+    pois = None
+    if config.points_of_interest.enabled:
+        cont_arr = np.zeros_like(bin_im)
+        cont_arr = cv2.drawContours(cont_arr, [contour], 0, 1, -1)
+        pois = mothseg.PointsOfInterest.detect(cont_arr)
+
+        stats.update(pois.stats)
+        stats.update(pois.distances(cal_length=cal_length))
 
     writer(impath, stats)
     writer.plot(impath, [im, bin_im, chan], contour, stats, pois=pois)

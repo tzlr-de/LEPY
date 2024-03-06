@@ -33,6 +33,13 @@ class Point:
             
         elif isinstance(other, np.ndarray):
             return self - other
+    
+    def rescale(self, width_scale: float, height_scale: float):
+        return Point(self.row * width_scale, self.col * height_scale)
+
+    def dist(self, other: Point):
+        diff = self - other
+        return np.sqrt(diff.row ** 2 + diff.col ** 2)
 
     def __array__(self, dtype=None):
         return np.array([self.row, self.col])
@@ -76,6 +83,40 @@ class PointsOfInterest:
             "poi-inner_r-x": int(self.inner_r.col),
             "poi-inner_r-y": int(self.inner_r.row),
         }
+
+    def distances(self, im_width: int = None, im_height: int = None, cal_length: float = None):
+        if cal_length is None:
+            cal_length = 1.0
+        if im_width is None:
+            im_width = self.width
+        if im_height is None:
+            im_height = self.height
+
+        w_scale = im_width / self.width / cal_length
+        h_scale = im_height / self.height / cal_length
+
+
+        res = {}
+        for key, *pts in self.named_distances:
+            p0, p1 = [p.rescale(width_scale=w_scale, height_scale=h_scale) for p in pts]
+            res[key] = p0.dist(p1)
+        return res
+
+        # center = self.center.rescale(width_scale=w_scale, height_scale=h_scale)
+        # outer_l = self.outer_l.rescale(width_scale=w_scale, height_scale=h_scale)
+        # outer_r = self.outer_r.rescale(width_scale=w_scale, height_scale=h_scale)
+        # inner_l = self.inner_l.rescale(width_scale=w_scale, height_scale=h_scale)
+        # inner_r = self.inner_r.rescale(width_scale=w_scale, height_scale=h_scale)
+
+    @property
+    def named_distances(self):
+        return [
+            ("poi-dist-inner", self.inner_l, self.inner_r),
+            ("poi-dist-inner-outer_l", self.inner_l, self.outer_l),
+            ("poi-dist-inner-outer_r", self.inner_r, self.outer_r),
+            ("poi-dist-center-outer_l", self.center, self.outer_l),
+            ("poi-dist-center-outer_r", self.center, self.outer_r),
+        ]
 
     @classmethod
     def detect(cls, bin_im: np.ndarray) -> PointsOfInterest:

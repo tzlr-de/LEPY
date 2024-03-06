@@ -50,8 +50,9 @@ def segment(im, *, method: str = "grabcut+otsu",
         'stddev-hue': float(np.std(H)),
         'image-width': width,
         'image-height': height,
-        'seg-absolute-size': len(V),
-        'seg-relative-size': len(V) / float( hsv_im.shape[0] * hsv_im.shape[1] ),
+        # these two do not make sense to me
+        # 'seg-absolute-size': len(V),
+        # 'seg-relative-size': len(V) / float( hsv_im.shape[0] * hsv_im.shape[1] ),
         
         'c-length': len(largest_contour),
         'c-area': cv2.contourArea(largest_contour),
