@@ -109,5 +109,3 @@ def plot_interm(im, interm, px_per_mm=None):
         
     plt.tight_layout()
     return fig 
-    # plt.show()
-    # plt.close()

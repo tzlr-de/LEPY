@@ -39,11 +39,13 @@ def process(impath, config, writer: mothseg.OutputWriter, *,
     cal_length = None
     if config.calibration.enabled:
         positions = {pos.name.lower(): pos for pos in scalebar.Position}
-        pos = positions.get(config.calibration.position)
-        if pos is None:
-            logging.error(f"Unsupported position: {config.calibration.position}")
-            return -3
-
+        if config.calibration.position == "auto":
+            pos = scalebar.Position.estimate(im)
+            logging.debug(f"Estimated position: {pos.name}")
+        elif config.calibration.position not in positions:
+            raise ValueError(f"Unsupported position: {config.calibration.position}")
+        else:
+            pos = positions.get(config.calibration.position)
         size = (config.calibration.rel_width, config.calibration.rel_height)
         cal_length, interm = scalebar.get_scale(im, 
                                                 cv2_corners=True,
@@ -60,6 +62,7 @@ def process(impath, config, writer: mothseg.OutputWriter, *,
             stats['width-calibrated'] = (stats['c-xmax'] - stats['c-xmin']) / cal_length
             stats['height-calibrated'] = (stats['c-ymax'] - stats['c-ymin']) / cal_length
             stats['calibration-length'] = cal_length
+            stats['calibration-position'] = pos.name.lower()
 
     pois = None
     if config.points_of_interest.enabled:

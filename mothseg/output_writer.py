@@ -36,7 +36,7 @@ class OutputWriter:
 
                 "c-length", "c-area", "c-xmin", "c-xmax", "c-ymin", "c-ymax", 
                 "c-area-calibrated", "width-calibrated", "height-calibrated",
-                "calibration-length",
+                "calibration-length", "calibration-position",
                 
                 "poi-dist-center-outer_l",
                 "poi-dist-center-outer_r",
