@@ -82,13 +82,12 @@ def main(args):
         logging.info("Execution aborted by the user!")
         return -1
     
-    output = utils.check_output(args, use_timestamp=False)
+    output = utils.check_output(args, use_timestamp=args.use_timestamp)
 
     if output is None:
         logging.info("No output folder selected, exiting script.")
         return -2
     else:
-        logging.info(f"Outputs are stored to {output}.") 
         if not proceed_check(args.yes):
             logging.info("Execution aborted by the user!")
             return -1

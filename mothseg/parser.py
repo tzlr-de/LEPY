@@ -12,6 +12,7 @@ def parse_args():
         Arg.flag("--yes", "-y"),
         
         Arg.flag("--show_interm"),
+        Arg.flag("--use_timestamp", "-use_ts"),
     ])
 
     return parser.parse_args()

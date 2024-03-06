@@ -40,6 +40,8 @@ def check_output(args, *, use_timestamp: bool = True):
             src = Path(args.folder)
             folder = src.parent / f"{src.name}_result"
 
+    logging.info(f"Outputs will be stored to {folder}.") 
+
     if Path(folder).exists():
         logging.warning("Output folder already exists!")
         if input("Do you want save outputs into an existing folder? [y/N] ").lower() != "y":
