@@ -20,7 +20,7 @@ class OutputWriter:
         shutil.copy(config, self.root / Path(config).name)
 
         self.csv = None
-        if store_to_csv: 
+        if store_to_csv:
             self._csv_file = open(self.root / "stats.csv", "w")
             self.csv = csv.writer(self._csv_file, delimiter="\t")
             self.header = [
@@ -29,15 +29,15 @@ class OutputWriter:
                 "image-width", "image-height",
 
                 "median-intensity", "mean-intensity", "stddev-intensity",
-                "median-saturation", "mean-saturation", "stddev-saturation", 
-                "median-hue", "mean-hue", "stddev-hue", 
+                "median-saturation", "mean-saturation", "stddev-saturation",
+                "median-hue", "mean-hue", "stddev-hue",
 
-                # "seg-absolute-size", "seg-relative-size", 
+                # "seg-absolute-size", "seg-relative-size",
 
-                "c-length", "c-area", "c-xmin", "c-xmax", "c-ymin", "c-ymax", 
+                "c-length", "c-area", "c-xmin", "c-xmax", "c-ymin", "c-ymax",
                 "c-area-calibrated", "width-calibrated", "height-calibrated",
                 "calibration-length", "calibration-position",
-                
+
                 "poi-dist-center-outer_l",
                 "poi-dist-center-outer_r",
                 "poi-dist-inner-outer_l",
@@ -53,32 +53,32 @@ class OutputWriter:
             ]
 
             self.csv.writerow(self.header)
-            
+
         self._err_file = open(self.root / "errors.log", "w")
-        
+
     def __del__(self):
         if hasattr(self, "_csv_file"):
             self._csv_file.close()
 
         if hasattr(self, "_err_file"):
             self._err_file.close()
-    
+
     def new_path(self, impath: str, new_suffix: str):
         new_path = Path(impath).with_suffix(new_suffix).name
         return self.root / new_path
 
     def __call__(self, impath: str, stats: dict, *, missing_value: str = "") -> None:
-        
+
         with open(self.new_path(impath, ".json"), "w") as f:
             json.dump(stats, f, indent=2)
-        
+
         if self.csv is None:
             return
-        
+
         row = [Path(impath).stem] + [stats.get(key, missing_value) for key in self.header[1:]]
         self.csv.writerow(row)
         self._csv_file.flush()
-    
+
     def plot(self, impath: str, ims, contour, stats, pois: PointsOfInterest):
         dest = self.new_path(impath, ".png")
         fig = vis.plot(ims, contour, stats, pois=pois)
@@ -87,11 +87,11 @@ class OutputWriter:
 
 
     def plot_interm(self, impath: str, im, interm, cal_length):
-        dest = self.new_path(impath, "_interm.png")
+        dest = self.new_path(impath, ".interm.png")
         fig = vis.plot_interm(im, interm, cal_length)
         fig.savefig(dest)
         plt.close()
-    
+
     def log_fail(self, impath: str, err: Exception):
         if not hasattr(self, "_err_file"):
             return
