@@ -2,6 +2,7 @@ import json
 import csv
 import shutil
 import datetime as dt
+import scalebar
 
 from matplotlib import pyplot as plt
 from pathlib import Path
@@ -86,9 +87,9 @@ class OutputWriter:
         plt.close()
 
 
-    def plot_interm(self, impath: str, im, interm, cal_length):
+    def plot_interm(self, impath: str, result: scalebar.Result):
         dest = self.new_path(impath, ".interm.png")
-        fig = vis.plot_interm(im, interm, cal_length)
+        fig = vis.plot_interm(result)
         fig.savefig(dest)
         plt.close()
 

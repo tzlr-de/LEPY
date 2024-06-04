@@ -13,27 +13,27 @@ class Point:
 
     def __radd__(self, other):
         return self+other
-        
+
     def __add__(self, other):
         if isinstance(other, (tuple, list)):
             return Point(self.row + other[0], self.col + other[1])
-            
+
         elif isinstance(other, Point):
             return Point(self.row + other.row, self.col + other.col)
-            
+
         elif isinstance(other, np.ndarray):
             return other + self
 
     def __sub__(self, other):
         if isinstance(other, (tuple, list)):
             return Point(self.row - other[0], self.col - other[1])
-            
+
         elif isinstance(other, Point):
             return Point(self.row - other.row, self.col - other.col)
-            
+
         elif isinstance(other, np.ndarray):
             return self - other
-    
+
     def rescale(self, width_scale: float, height_scale: float):
         return Point(self.row * width_scale, self.col * height_scale)
 
@@ -43,7 +43,7 @@ class Point:
 
     def __array__(self, dtype=None):
         return np.array([self.row, self.col])
-    
+
 
 @dataclass
 class PointsOfInterest:
@@ -61,7 +61,7 @@ class PointsOfInterest:
         yield "outer_r", self.outer_r
         yield "inner_l", self.inner_l
         yield "inner_r", self.inner_r
-    
+
     @property
     def stats(self):
         return {
@@ -70,30 +70,30 @@ class PointsOfInterest:
 
             "poi-center-x": int(self.center.col),
             "poi-center-y": int(self.center.row),
-            
+
             "poi-outer_l-x": int(self.outer_l.col),
             "poi-outer_l-y": int(self.outer_l.row),
 
             "poi-outer_r-x": int(self.outer_r.col),
             "poi-outer_r-y": int(self.outer_r.row),
-            
+
             "poi-inner_l-x": int(self.inner_l.col),
             "poi-inner_l-y": int(self.inner_l.row),
-            
+
             "poi-inner_r-x": int(self.inner_r.col),
             "poi-inner_r-y": int(self.inner_r.row),
         }
 
-    def distances(self, im_width: int = None, im_height: int = None, cal_length: float = None):
-        if cal_length is None:
-            cal_length = 1.0
+    def distances(self, im_width: int = None, im_height: int = None, scale: float = None):
+        if scale is None:
+            scale = 1.0
         if im_width is None:
             im_width = self.width
         if im_height is None:
             im_height = self.height
 
-        w_scale = im_width / self.width / cal_length
-        h_scale = im_height / self.height / cal_length
+        w_scale = im_width / self.width / scale
+        h_scale = im_height / self.height / scale
 
 
         res = {}
@@ -122,21 +122,21 @@ class PointsOfInterest:
     def detect(cls, bin_im: np.ndarray) -> PointsOfInterest:
         H, W, *C = bin_im.shape
         middle = split_picture(bin_im)
-    
+
         binary_left = bin_im[:, :middle]
         binary_right = bin_im[:, middle:]
-    
+
         # Centroid of central column
         middle_arr = bin_im[:, middle]
         middle_y = int(np.mean(np.argwhere(middle_arr)))
         body_center = Point(middle_y, middle)
-    
+
         # Left wing
         without_antenna_l = remove_antenna(binary_left)
         outer_pix_l = detect_outer_pix(without_antenna_l, body_center)
         inner_pix_l = detect_inner_pix(without_antenna_l, outer_pix_l, 'l')
         inner_pix_l = inner_pix_l + Point(0, outer_pix_l.col)
-    
+
         # Right wing
         body_center_r = Point(middle_y, 0)  # to calculate outer_pix_r correctly
         without_antenna_r = remove_antenna(binary_right)
@@ -305,5 +305,3 @@ def split_picture(binary):
     column_idxs = np.arange(binary.shape[1])
     column_centroid = np.sum(column_weights_normalized * column_idxs)
     return int(column_centroid)
-
-
