@@ -52,15 +52,19 @@ class PointsOfInterest:
     center: Point
     outer_l: Point
     outer_r: Point
-    inner_l: Point
-    inner_r: Point
+    inner_top_l: Point
+    inner_top_r: Point
+    inner_bot_l: Point
+    inner_bot_r: Point
 
     def __iter__(self):
         yield "center", self.center
         yield "outer_l", self.outer_l
         yield "outer_r", self.outer_r
-        yield "inner_l", self.inner_l
-        yield "inner_r", self.inner_r
+        yield "inner_top_l", self.inner_top_l
+        yield "inner_top_r", self.inner_top_r
+        yield "inner_bot_l", self.inner_bot_l
+        yield "inner_bot_r", self.inner_bot_r
 
     @property
     def stats(self):
@@ -77,11 +81,18 @@ class PointsOfInterest:
             "poi-outer_r-x": int(self.outer_r.col),
             "poi-outer_r-y": int(self.outer_r.row),
 
-            "poi-inner_l-x": int(self.inner_l.col),
-            "poi-inner_l-y": int(self.inner_l.row),
+            "poi-inner_top_l-x": int(self.inner_top_l.col),
+            "poi-inner_top_l-y": int(self.inner_top_l.row),
 
-            "poi-inner_r-x": int(self.inner_r.col),
-            "poi-inner_r-y": int(self.inner_r.row),
+            "poi-inner_top_r-x": int(self.inner_top_r.col),
+            "poi-inner_top_r-y": int(self.inner_top_r.row),
+
+            "poi-inner_bot_l-x": int(self.inner_bot_l.col),
+            "poi-inner_bot_l-y": int(self.inner_bot_l.row),
+
+            "poi-inner_bot_r-x": int(self.inner_bot_r.col),
+            "poi-inner_bot_r-y": int(self.inner_bot_r.row),
+
         }
 
     def distances(self, im_width: int = None, im_height: int = None, scale: float = None):
@@ -111,9 +122,9 @@ class PointsOfInterest:
     @property
     def named_distances(self):
         return [
-            ("poi-dist-inner", self.inner_l, self.inner_r),
-            ("poi-dist-inner-outer_l", self.inner_l, self.outer_l),
-            ("poi-dist-inner-outer_r", self.inner_r, self.outer_r),
+            ("poi-dist-inner", self.inner_top_l, self.inner_top_r),
+            ("poi-dist-inner-outer_l", self.inner_top_l, self.outer_l),
+            ("poi-dist-inner-outer_r", self.inner_top_r, self.outer_r),
             ("poi-dist-center-outer_l", self.center, self.outer_l),
             ("poi-dist-center-outer_r", self.center, self.outer_r),
         ]
@@ -134,24 +145,33 @@ class PointsOfInterest:
         # Left wing
         without_antenna_l = remove_antenna(binary_left)
         outer_pix_l = detect_outer_pix(without_antenna_l, body_center)
-        inner_pix_l = detect_inner_pix(without_antenna_l, outer_pix_l, 'l')
-        inner_pix_l = inner_pix_l + Point(0, outer_pix_l.col)
+        inner_top_l = detect_inner_pix(without_antenna_l, outer_pix_l, 'l')
+        inner_top_l = inner_top_l + Point(0, outer_pix_l.col)
+        inner_bot_l = detect_inner_bottom(without_antenna_l, inner_top_l, 'l')
 
         # Right wing
         body_center_r = Point(middle_y, 0)  # to calculate outer_pix_r correctly
         without_antenna_r = remove_antenna(binary_right)
-        outer_pix_r = detect_outer_pix(without_antenna_r, body_center_r)
-        inner_pix_r = detect_inner_pix(without_antenna_r, outer_pix_r, 'r')
-        inner_pix_r = inner_pix_r + Point(0, middle)
-        outer_pix_r = outer_pix_r + Point(0, middle)
+        outer_r = detect_outer_pix(without_antenna_r, body_center_r)
+        inner_top_r = detect_inner_pix(without_antenna_r, outer_r, 'r')
+        inner_bot_r = detect_inner_bottom(without_antenna_r, inner_top_r, 'r')
+
+        inner_top_r = inner_top_r + Point(0, middle)
+        inner_bot_r = inner_bot_r + Point(0, middle)
+        outer_r = outer_r + Point(0, middle)
+
 
         return PointsOfInterest(
             width=W, height=H,
             center=body_center,
             outer_l=outer_pix_l,
-            outer_r=outer_pix_r,
-            inner_l=inner_pix_l,
-            inner_r=inner_pix_r,
+            outer_r=outer_r,
+
+            inner_top_l=inner_top_l,
+            inner_top_r=inner_top_r,
+
+            inner_bot_l=inner_bot_l,
+            inner_bot_r=inner_bot_r,
         )
 
 
@@ -169,13 +189,11 @@ def remove_antenna(half_binary):
         binary image, same shape as input without antenna (if it touches the
         wing)
     """
-
     markers, _ = sp.ndimage.label(
         1 - half_binary,
         sp.ndimage.generate_binary_structure(2, 1)
     )
     regions = measure.regionprops(markers)
-
     areas = np.array([r.area for r in regions])
     idx_sorted = 1 + np.argsort(-areas)[:2]
 
@@ -281,6 +299,12 @@ def detect_inner_pix(half_binary, outer_pix: Point, side: str) -> Point:
 
     return Point(*inner_pix)
 
+def detect_inner_bottom(half_binary, inner_top: Point, side: str) -> Point:
+
+    rows = np.where(1-half_binary[inner_top.row+1:, inner_top.col])[0]
+
+    row, col = rows[0] + inner_top.row, inner_top.col
+    return Point(row, col)
 
 def split_picture(binary):
     """Calculate the middle of the butterfly.

@@ -13,10 +13,16 @@ from mothseg import visualization as vis
 class BaseWriter:
 
     def __init__(self, folder: str) -> None:
-        self.root = Path(folder)
-        self.root.mkdir(exist_ok=True, parents=True)
+        if folder is None:
+            self.root = None
+        else:
+            self.root = Path(folder)
+            self.root.mkdir(exist_ok=True, parents=True)
 
     def new_path(self, impath: str, new_suffix: str, *, subfolder: str = None):
+        if self.root is None:
+            return None
+
         new_path = Path(impath).with_suffix(new_suffix).name
         if subfolder is None:
             return self.root / new_path
@@ -62,9 +68,12 @@ class OutputWriter(BaseWriter):
                 "poi-center-x", "poi-center-y",
                 "poi-outer_l-x", "poi-outer_l-y",
                 "poi-outer_r-x", "poi-outer_r-y",
-                "poi-inner_l-x", "poi-inner_l-y",
-                "poi-inner_r-x", "poi-inner_r-y",
+                "poi-inner_top_l-x", "poi-inner_top_l-y",
+                "poi-inner_top_r-x", "poi-inner_top_r-y",
+                "poi-inner_bot_l-x", "poi-inner_bot_l-y",
+                "poi-inner_bot_r-x", "poi-inner_bot_r-y",
             ]
+
 
             self.write_csv_row(self.header)
 
@@ -107,7 +116,10 @@ class Plotter(BaseWriter):
     def plot(self, impath: str, ims, contour, stats, pois: PointsOfInterest):
         dest = self.new_path(impath, ".png", subfolder="visualizations")
         fig = vis.plot(ims, contour, stats, pois=pois)
-        fig.savefig(dest)
+        if dest is not None:
+            fig.savefig(dest)
+        else:
+            plt.show()
         plt.close()
 
 
@@ -116,5 +128,8 @@ class Plotter(BaseWriter):
             return
         dest = self.new_path(impath, ".png", subfolder="interm")
         fig = vis.plot_interm(result)
-        fig.savefig(dest)
+        if dest is not None:
+            fig.savefig(dest)
+        else:
+            plt.show()
         plt.close()
