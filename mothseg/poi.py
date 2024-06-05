@@ -50,6 +50,8 @@ class PointsOfInterest:
     width: int
     height: int
     center: Point
+    body_top: Point
+    body_bot: Point
     outer_l: Point
     outer_r: Point
     inner_top_l: Point
@@ -58,7 +60,9 @@ class PointsOfInterest:
     inner_bot_r: Point
 
     def __iter__(self):
-        yield "center", self.center
+        # yield "center", self.center
+        yield "body_top", self.body_top
+        yield "body_bot", self.body_bot
         yield "outer_l", self.outer_l
         yield "outer_r", self.outer_r
         yield "inner_top_l", self.inner_top_l
@@ -74,6 +78,12 @@ class PointsOfInterest:
 
             "poi-center-x": int(self.center.col),
             "poi-center-y": int(self.center.row),
+
+            "poi-body_top-x": int(self.body_top.col),
+            "poi-body_top-y": int(self.body_top.row),
+
+            "poi-body_bot-x": int(self.body_bot.col),
+            "poi-body_bot-y": int(self.body_bot.row),
 
             "poi-outer_l-x": int(self.outer_l.col),
             "poi-outer_l-y": int(self.outer_l.row),
@@ -123,10 +133,11 @@ class PointsOfInterest:
     def named_distances(self):
         return [
             ("poi-dist-inner", self.inner_top_l, self.inner_top_r),
+            ("poi-dist-body", self.body_top, self.body_bot),
             ("poi-dist-inner-outer_l", self.inner_top_l, self.outer_l),
             ("poi-dist-inner-outer_r", self.inner_top_r, self.outer_r),
-            ("poi-dist-center-outer_l", self.center, self.outer_l),
-            ("poi-dist-center-outer_r", self.center, self.outer_r),
+            # ("poi-dist-center-outer_l", self.center, self.outer_l),
+            # ("poi-dist-center-outer_r", self.center, self.outer_r),
         ]
 
     @classmethod
@@ -160,10 +171,15 @@ class PointsOfInterest:
         inner_bot_r = inner_bot_r + Point(0, middle)
         outer_r = outer_r + Point(0, middle)
 
+        body_top, body_bot = detect_body(bin_im,
+                                         inner_top_l, inner_top_r)
+
 
         return PointsOfInterest(
             width=W, height=H,
             center=body_center,
+            body_top=body_top,
+            body_bot=body_bot,
             outer_l=outer_pix_l,
             outer_r=outer_r,
 
@@ -174,6 +190,15 @@ class PointsOfInterest:
             inner_bot_r=inner_bot_r,
         )
 
+def detect_body(bin_im, inner_top_l, inner_top_r):
+    body = bin_im[:, inner_top_l.col:inner_top_r.col]
+    rows, cols = np.where(body == 1)
+    col = int(np.mean(cols))
+    middle = int(np.mean(rows))
+
+    top = np.where(body[:middle, col] == 1)[0][0]
+    bot = np.where(body[middle:, col] == 0)[0][0] + middle
+    return Point(top, col + inner_top_l.col), Point(bot, col + inner_top_l.col)
 
 def remove_antenna(half_binary):
     """Remove antenna if connected to the wing
