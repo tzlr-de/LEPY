@@ -16,9 +16,14 @@ class BaseWriter:
         self.root = Path(folder)
         self.root.mkdir(exist_ok=True, parents=True)
 
-    def new_path(self, impath: str, new_suffix: str):
+    def new_path(self, impath: str, new_suffix: str, *, subfolder: str = None):
         new_path = Path(impath).with_suffix(new_suffix).name
-        return self.root / new_path
+        if subfolder is None:
+            return self.root / new_path
+        else:
+            subpath = self.root / subfolder
+            subpath.mkdir(exist_ok=True, parents=True)
+            return subpath / new_path
 
 class OutputWriter(BaseWriter):
 
@@ -74,7 +79,7 @@ class OutputWriter(BaseWriter):
 
     def __call__(self, impath: str, stats: dict, *, missing_value: str = "") -> None:
 
-        with open(self.new_path(impath, ".json"), "w") as f:
+        with open(self.new_path(impath, ".json", subfolder="json"), "w") as f:
             json.dump(stats, f, indent=2)
 
         if self._csv_file is None:
@@ -100,7 +105,7 @@ class Plotter(BaseWriter):
         self._plot_interm = plot_interm
 
     def plot(self, impath: str, ims, contour, stats, pois: PointsOfInterest):
-        dest = self.new_path(impath, ".png")
+        dest = self.new_path(impath, ".png", subfolder="visualizations")
         fig = vis.plot(ims, contour, stats, pois=pois)
         fig.savefig(dest)
         plt.close()
@@ -109,7 +114,7 @@ class Plotter(BaseWriter):
     def plot_interm(self, impath: str, result: scalebar.Result):
         if not self._plot_interm:
             return
-        dest = self.new_path(impath, ".interm.png")
+        dest = self.new_path(impath, ".png", subfolder="interm")
         fig = vis.plot_interm(result)
         fig.savefig(dest)
         plt.close()
