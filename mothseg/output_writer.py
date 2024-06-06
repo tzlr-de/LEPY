@@ -58,14 +58,18 @@ class OutputWriter(BaseWriter):
                 "contour-area-calibrated", "width-calibrated", "height-calibrated",
                 "calibration-length", "calibration-pos-x", "calibration-pos-y", "calibration-pos-w", "calibration-pos-h",
 
-                "poi-dist-center-outer_l",
-                "poi-dist-center-outer_r",
+                "poi-area-body", "poi-area-wing_l", "poi-area-wing_r",
+
+                # "poi-dist-center-outer_l",
+                # "poi-dist-center-outer_r",
                 "poi-dist-inner-outer_l",
                 "poi-dist-inner-outer_r",
                 "poi-dist-inner",
 
                 "poi-orig_width", "poi-orig_height",
                 "poi-center-x", "poi-center-y",
+                "poi-body_top-x", "poi-body_top-y",
+                "poi-body_bot-x", "poi-body_bot-y",
                 "poi-outer_l-x", "poi-outer_l-y",
                 "poi-outer_r-x", "poi-outer_r-y",
                 "poi-inner_top_l-x", "poi-inner_top_l-y",

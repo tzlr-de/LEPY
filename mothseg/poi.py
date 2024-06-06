@@ -120,14 +120,35 @@ class PointsOfInterest:
         res = {}
         for key, *pts in self.named_distances:
             p0, p1 = [p.rescale(width_scale=w_scale, height_scale=h_scale) for p in pts]
-            res[key] = p0.dist(p1)
+            res[key] = float(p0.dist(p1))
         return res
 
-        # center = self.center.rescale(width_scale=w_scale, height_scale=h_scale)
-        # outer_l = self.outer_l.rescale(width_scale=w_scale, height_scale=h_scale)
-        # outer_r = self.outer_r.rescale(width_scale=w_scale, height_scale=h_scale)
-        # inner_l = self.inner_l.rescale(width_scale=w_scale, height_scale=h_scale)
-        # inner_r = self.inner_r.rescale(width_scale=w_scale, height_scale=h_scale)
+    def areas(self, bin_im, scale: float = None):
+        if scale is None:
+            scale = 1.0
+        res = {}
+        for key, masks, val in self.named_areas(bin_im):
+            res[key] = float(np.sum(masks == val) / scale ** 2)
+        return res
+
+    def named_areas(self, bin_im):
+
+        res = bin_im.copy()
+
+        body = res[:, self.inner_top_l.col:self.inner_top_r.col]
+        body[body == 1] = 1
+
+        left_wing = res[:, :self.inner_top_l.col]
+        left_wing[left_wing == 1] = 2
+
+        right_wing = res[:, self.inner_top_r.col:]
+        right_wing[right_wing == 1] = 3
+
+        return [
+            ("poi-area-body", res, 1),
+            ("poi-area-wing_l", res, 2),
+            ("poi-area-wing_r", res, 3),
+        ]
 
     @property
     def named_distances(self):
@@ -136,8 +157,6 @@ class PointsOfInterest:
             ("poi-dist-body", self.body_top, self.body_bot),
             ("poi-dist-inner-outer_l", self.inner_top_l, self.outer_l),
             ("poi-dist-inner-outer_r", self.inner_top_r, self.outer_r),
-            # ("poi-dist-center-outer_l", self.center, self.outer_l),
-            # ("poi-dist-center-outer_r", self.center, self.outer_r),
         ]
 
     @classmethod

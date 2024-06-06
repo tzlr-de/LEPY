@@ -56,7 +56,7 @@ def main(args):
         writer = mothseg.OutputWriter(output, config=args.config)
         plotter = mothseg.Plotter(output, plot_interm=args.plot_interm)
         worker = mothseg.Worker(config, plotter,
-                        progress_callback=None, #bar.set_description,
+                        progress_callback=None if pool is not None else bar.set_description,
                         raise_on_error=args.raise_on_error)
 
         for impath, stats, e in mapper(worker, images):

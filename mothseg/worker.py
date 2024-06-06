@@ -62,7 +62,7 @@ class Worker:
             if self.plotter is not None:
                 self.plotter.plot_interm(impath, result=res)
 
-            scale = res.scale
+            scale = float(res.scale)
             if scale is not None and scale > 0:
                 stats['calibration-length'] = scale
                 stats['calibration-pos-x'] = int(res.position.x)
@@ -82,6 +82,7 @@ class Worker:
 
             stats.update(pois.stats)
             stats.update(pois.distances(scale=scale))
+            stats.update(pois.areas(bin_im=cont_arr, scale=scale))
 
 
         self.callback(f"[{imname}] Plotting results")
