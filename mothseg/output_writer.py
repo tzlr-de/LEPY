@@ -64,7 +64,7 @@ class OutputWriter(BaseWriter):
                 # "poi-dist-center-outer_r",
                 "poi-dist-inner-outer_l",
                 "poi-dist-inner-outer_r",
-                "poi-dist-inner",
+                "poi-dist-inner", "poi-dist-body",
 
                 "poi-orig_width", "poi-orig_height",
                 "poi-center-x", "poi-center-y",
