@@ -1,7 +1,7 @@
-import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import typing as T
+import scalebar
 
 from mothseg import PointsOfInterest
 
@@ -11,22 +11,21 @@ def plot(ims, contour, stats, pois: T.Optional[PointsOfInterest] = None):
 
     for _, _im in enumerate(ims):
         ax = axs[np.unravel_index(_, axs.shape)]
-        
+
         ax.imshow(_im)
         ax.plot(contour[:, 0], contour[:, 1], linewidth=2, alpha=0.6)
-        
-        rx = [stats['c-xmin'], stats['c-xmax'], stats['c-xmax'], stats['c-xmin'], stats['c-xmin']]
-        ry = [stats['c-ymin'], stats['c-ymin'], stats['c-ymax'], stats['c-ymax'], stats['c-ymin']]
-        ax.plot(rx, ry, 'm--', linewidth=0.5)
-        ax.annotate("", xy=(stats['c-xmin'], stats['c-ymax']), xytext=(stats['c-xmax'], stats['c-ymax']),
+        x0, y0, x1, y1 = stats['contour-xmin'], stats['contour-ymin'], stats['contour-xmax'], stats['contour-ymax']
+
+        ax.add_patch(plt.Rectangle((x0, y0), x1 - x0, y1 - y0, fill=None, edgecolor='m', linewidth=1))
+        ax.annotate("", xy=(x0, y1), xytext=(x1, y1),
                     arrowprops=dict(arrowstyle='<->'))
 
         if 'calibration-length' not in stats:
-            lengthx = '{:.0f} pixels'.format(stats['c-xmax'] - stats['c-xmin'])
+            lengthx = '{:.0f} pixels'.format(x1 - x0)
         else:
             lengthx = '{:.2f} mm'.format(stats['width-calibrated'])
 
-        ax.text(0.5 * (stats['c-xmax'] + stats['c-xmin']), stats['c-ymax'] + 20,
+        ax.text(0.5 * (x1 + x0), y1 + 20,
                  lengthx,
                  horizontalalignment='center', verticalalignment='top', fontsize=18)
 
@@ -37,75 +36,89 @@ def plot(ims, contour, stats, pois: T.Optional[PointsOfInterest] = None):
             for key, p0, p1 in pois.named_distances:
                 dist = stats[key]
                 unit = "px" if 'calibration-length' not in stats else "mm"
-                ax.annotate("", xy=(p0.col, p0.row), xytext=(p1.col, p1.row), 
+                ax.annotate("", xy=(p0.col, p0.row), xytext=(p1.col, p1.row),
                             arrowprops=dict(arrowstyle='<->'))
-                ax.text(x=(p0.col + p1.col)/2, y=(p0.row + p1.row)/2 + 15, 
+                ax.text(x=(p0.col + p1.col)/2, y=(p0.row + p1.row)/2 + 15,
                         s=f"{dist:.2f} {unit}",
-                        horizontalalignment='center', 
-                        verticalalignment='top', 
+                        horizontalalignment='center',
+                        verticalalignment='top',
                         fontsize=10,
                 )
 
     plt.tight_layout()
     return fig
-    # plt.show()
-    # plt.close()
 
 
-def plot_interm(im, interm, px_per_mm=None):
-    H, W, *C = im.shape
-    
-    fig = plt.figure(figsize=(16,9))
-    grid = plt.GridSpec(3, 2)
+def imshow(ims):
 
-    ax = plt.subplot(grid[:1, :])
-    ax.axis("off")
-    ax.imshow(im)
-    ax.set_title("Input image")
+    if len(ims) <= 3:
+        nrows, ncols = 1, len(ims)
+    else:
+        nrows = int(np.ceil(np.sqrt(len(ims))))
+        ncols = int(np.ceil( len(ims) / nrows))
 
-    crop = interm["crop"]
-    init_corners = interm["detected_corners"]
-    mask = interm["filter_mask"]
-    angle = interm["rectification_angle"]
-    corners = interm["final_corners"]
+    fig, axs = plt.subplots(ncols=ncols, nrows=nrows,
+                            figsize=(16,9), squeeze=False)
+    for i, (title, im, cmap) in enumerate(ims):
+        ax = axs[np.unravel_index(i, axs.shape)]
 
-    ax = plt.subplot(grid[-2:, 0])
-    ax.axis("off")
-    ax.imshow(crop)
-    ax.set_title("Original crop")
+        if isinstance(im, (list, tuple)):
+            alpha = 1 / len(im)
+            for _im, _cm in zip(im, cmap):
+                ax.imshow(_im, cmap=_cm, alpha=alpha)
+        else:
+            ax.imshow(im, cmap=cmap)
+        ax.set_title(title)
+
+    for _ in range(i+1, nrows*ncols):
+        ax = axs[np.unravel_index(_, axs.shape)]
+        ax.axis("off")
+
+    return fig, axs
 
 
-    ys, xs = init_corners[mask].transpose(1, 0)
-    ax.scatter(xs, ys, marker=".", c="red", label="used")
-    
-    if px_per_mm is not None:
-        for cx, cy in zip(xs, ys):
-            ax.arrow(cx, cy, px_per_mm, 0, width=1, length_includes_head=True)
-    
-    ys, xs = init_corners[~mask].transpose(1, 0)
-    ax.scatter(xs, ys, marker=".", c="blue", alpha=0.7, label="rejected")
-    ax.legend(loc="upper right")
+def plot_interm(result: scalebar.Result):
+    images = result.images
+    im = result.images.original
 
-    ax = plt.subplot(grid[-2:, 1])
-    rot_mat = cv2.getRotationMatrix2D([0, 0], angle, 1.0)
-    H, W, *C = crop.shape
-    new_crop = cv2.warpAffine(crop, rot_mat, (W, H))
+    ROI = scalebar.utils.hide_non_roi(images.binary, result.scalebar_size.value / 2, 127, location=result.scalebar_location)
+    scalebar_crop = result.position.crop(images.equalized)
+    match_crop = result.position.crop(result.match)
+    px_per_mm = result.scale
 
-    ax.imshow(new_crop)
-    ax.axis("off")
-    ax.set_title("Rectified crop")
-    ys, xs = corners.transpose(1, 0)
-    ax.scatter(xs, ys, marker=".", c="red")
+
+    fig, axs = imshow([
+        ("Input image", im, plt.cm.gray),
+        ("B/W image", images.gray, plt.cm.gray),
+        ("B/W image equalized", images.equalized, plt.cm.gray),
+
+        ("Binarized", images.binary, plt.cm.gray),
+        ("ROI to be masked", ROI, plt.cm.gray),
+        ("Masked", images.masked, plt.cm.gray),
+
+        # ("Template", , plt.cm.gray),
+        ("Template Matches", (images.binary, result.match), (plt.cm.gray, plt.cm.viridis)),
+
+        ("Cropped template matches", (scalebar_crop, match_crop), (plt.cm.gray, plt.cm.viridis)),
+        (f"Scalebar | {px_per_mm} px/mm", scalebar_crop, plt.cm.gray),
+    ])
+    ax = axs[np.unravel_index(8, axs.shape)]
+    ys, xs = result.distances.corners.transpose(1, 0)
+    ax.scatter(xs, ys, marker=".", c="red", alpha=0.3)
+
 
     if px_per_mm is None:
         fig.suptitle("Estimation Failed!")
+
     else:
+        W, H = result.image_size
         size = W / px_per_mm, H / px_per_mm
         fig.suptitle(" | ".join(
             [
                 f"{px_per_mm:.2f} px/mm",
                 f"Image size: {size[0]:.2f} x {size[1]:.2f}mm"
-            ]))
-        
+            ])
+        )
+
     plt.tight_layout()
-    return fig 
+    return fig

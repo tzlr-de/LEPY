@@ -13,27 +13,27 @@ class Point:
 
     def __radd__(self, other):
         return self+other
-        
+
     def __add__(self, other):
         if isinstance(other, (tuple, list)):
             return Point(self.row + other[0], self.col + other[1])
-            
+
         elif isinstance(other, Point):
             return Point(self.row + other.row, self.col + other.col)
-            
+
         elif isinstance(other, np.ndarray):
             return other + self
 
     def __sub__(self, other):
         if isinstance(other, (tuple, list)):
             return Point(self.row - other[0], self.col - other[1])
-            
+
         elif isinstance(other, Point):
             return Point(self.row - other.row, self.col - other.col)
-            
+
         elif isinstance(other, np.ndarray):
             return self - other
-    
+
     def rescale(self, width_scale: float, height_scale: float):
         return Point(self.row * width_scale, self.col * height_scale)
 
@@ -43,25 +43,33 @@ class Point:
 
     def __array__(self, dtype=None):
         return np.array([self.row, self.col])
-    
+
 
 @dataclass
 class PointsOfInterest:
     width: int
     height: int
     center: Point
+    body_top: Point
+    body_bot: Point
     outer_l: Point
     outer_r: Point
-    inner_l: Point
-    inner_r: Point
+    inner_top_l: Point
+    inner_top_r: Point
+    inner_bot_l: Point
+    inner_bot_r: Point
 
     def __iter__(self):
-        yield "center", self.center
+        # yield "center", self.center
+        yield "body_top", self.body_top
+        yield "body_bot", self.body_bot
         yield "outer_l", self.outer_l
         yield "outer_r", self.outer_r
-        yield "inner_l", self.inner_l
-        yield "inner_r", self.inner_r
-    
+        yield "inner_top_l", self.inner_top_l
+        yield "inner_top_r", self.inner_top_r
+        yield "inner_bot_l", self.inner_bot_l
+        yield "inner_bot_r", self.inner_bot_r
+
     @property
     def stats(self):
         return {
@@ -70,90 +78,146 @@ class PointsOfInterest:
 
             "poi-center-x": int(self.center.col),
             "poi-center-y": int(self.center.row),
-            
+
+            "poi-body_top-x": int(self.body_top.col),
+            "poi-body_top-y": int(self.body_top.row),
+
+            "poi-body_bot-x": int(self.body_bot.col),
+            "poi-body_bot-y": int(self.body_bot.row),
+
             "poi-outer_l-x": int(self.outer_l.col),
             "poi-outer_l-y": int(self.outer_l.row),
 
             "poi-outer_r-x": int(self.outer_r.col),
             "poi-outer_r-y": int(self.outer_r.row),
-            
-            "poi-inner_l-x": int(self.inner_l.col),
-            "poi-inner_l-y": int(self.inner_l.row),
-            
-            "poi-inner_r-x": int(self.inner_r.col),
-            "poi-inner_r-y": int(self.inner_r.row),
+
+            "poi-inner_top_l-x": int(self.inner_top_l.col),
+            "poi-inner_top_l-y": int(self.inner_top_l.row),
+
+            "poi-inner_top_r-x": int(self.inner_top_r.col),
+            "poi-inner_top_r-y": int(self.inner_top_r.row),
+
+            "poi-inner_bot_l-x": int(self.inner_bot_l.col),
+            "poi-inner_bot_l-y": int(self.inner_bot_l.row),
+
+            "poi-inner_bot_r-x": int(self.inner_bot_r.col),
+            "poi-inner_bot_r-y": int(self.inner_bot_r.row),
+
         }
 
-    def distances(self, im_width: int = None, im_height: int = None, cal_length: float = None):
-        if cal_length is None:
-            cal_length = 1.0
+    def distances(self, im_width: int = None, im_height: int = None, scale: float = None):
+        if scale is None:
+            scale = 1.0
         if im_width is None:
             im_width = self.width
         if im_height is None:
             im_height = self.height
 
-        w_scale = im_width / self.width / cal_length
-        h_scale = im_height / self.height / cal_length
+        w_scale = im_width / self.width / scale
+        h_scale = im_height / self.height / scale
 
 
         res = {}
         for key, *pts in self.named_distances:
             p0, p1 = [p.rescale(width_scale=w_scale, height_scale=h_scale) for p in pts]
-            res[key] = p0.dist(p1)
+            res[key] = float(p0.dist(p1))
         return res
 
-        # center = self.center.rescale(width_scale=w_scale, height_scale=h_scale)
-        # outer_l = self.outer_l.rescale(width_scale=w_scale, height_scale=h_scale)
-        # outer_r = self.outer_r.rescale(width_scale=w_scale, height_scale=h_scale)
-        # inner_l = self.inner_l.rescale(width_scale=w_scale, height_scale=h_scale)
-        # inner_r = self.inner_r.rescale(width_scale=w_scale, height_scale=h_scale)
+    def areas(self, bin_im, scale: float = None):
+        if scale is None:
+            scale = 1.0
+        res = {}
+        for key, masks, val in self.named_areas(bin_im):
+            res[key] = float(np.sum(masks == val) / scale ** 2)
+        return res
+
+    def named_areas(self, bin_im):
+
+        res = bin_im.copy()
+
+        body = res[:, self.inner_top_l.col:self.inner_top_r.col]
+        body[body == 1] = 1
+
+        left_wing = res[:, :self.inner_top_l.col]
+        left_wing[left_wing == 1] = 2
+
+        right_wing = res[:, self.inner_top_r.col:]
+        right_wing[right_wing == 1] = 3
+
+        return [
+            ("poi-area-body", res, 1),
+            ("poi-area-wing_l", res, 2),
+            ("poi-area-wing_r", res, 3),
+        ]
 
     @property
     def named_distances(self):
         return [
-            ("poi-dist-inner", self.inner_l, self.inner_r),
-            ("poi-dist-inner-outer_l", self.inner_l, self.outer_l),
-            ("poi-dist-inner-outer_r", self.inner_r, self.outer_r),
-            ("poi-dist-center-outer_l", self.center, self.outer_l),
-            ("poi-dist-center-outer_r", self.center, self.outer_r),
+            ("poi-dist-inner", self.inner_top_l, self.inner_top_r),
+            ("poi-dist-body", self.body_top, self.body_bot),
+            ("poi-dist-inner-outer_l", self.inner_top_l, self.outer_l),
+            ("poi-dist-inner-outer_r", self.inner_top_r, self.outer_r),
         ]
 
     @classmethod
     def detect(cls, bin_im: np.ndarray) -> PointsOfInterest:
         H, W, *C = bin_im.shape
         middle = split_picture(bin_im)
-    
+
         binary_left = bin_im[:, :middle]
         binary_right = bin_im[:, middle:]
-    
+
         # Centroid of central column
         middle_arr = bin_im[:, middle]
         middle_y = int(np.mean(np.argwhere(middle_arr)))
         body_center = Point(middle_y, middle)
-    
+
         # Left wing
         without_antenna_l = remove_antenna(binary_left)
         outer_pix_l = detect_outer_pix(without_antenna_l, body_center)
-        inner_pix_l = detect_inner_pix(without_antenna_l, outer_pix_l, 'l')
-        inner_pix_l = inner_pix_l + Point(0, outer_pix_l.col)
-    
+        inner_top_l = detect_inner_pix(without_antenna_l, outer_pix_l, 'l')
+        inner_top_l = inner_top_l + Point(0, outer_pix_l.col)
+        inner_bot_l = detect_inner_bottom(without_antenna_l, inner_top_l, 'l')
+
         # Right wing
         body_center_r = Point(middle_y, 0)  # to calculate outer_pix_r correctly
         without_antenna_r = remove_antenna(binary_right)
-        outer_pix_r = detect_outer_pix(without_antenna_r, body_center_r)
-        inner_pix_r = detect_inner_pix(without_antenna_r, outer_pix_r, 'r')
-        inner_pix_r = inner_pix_r + Point(0, middle)
-        outer_pix_r = outer_pix_r + Point(0, middle)
+        outer_r = detect_outer_pix(without_antenna_r, body_center_r)
+        inner_top_r = detect_inner_pix(without_antenna_r, outer_r, 'r')
+        inner_bot_r = detect_inner_bottom(without_antenna_r, inner_top_r, 'r')
+
+        inner_top_r = inner_top_r + Point(0, middle)
+        inner_bot_r = inner_bot_r + Point(0, middle)
+        outer_r = outer_r + Point(0, middle)
+
+        body_top, body_bot = detect_body(bin_im,
+                                         inner_top_l, inner_top_r)
+
 
         return PointsOfInterest(
             width=W, height=H,
             center=body_center,
+            body_top=body_top,
+            body_bot=body_bot,
             outer_l=outer_pix_l,
-            outer_r=outer_pix_r,
-            inner_l=inner_pix_l,
-            inner_r=inner_pix_r,
+            outer_r=outer_r,
+
+            inner_top_l=inner_top_l,
+            inner_top_r=inner_top_r,
+
+            inner_bot_l=inner_bot_l,
+            inner_bot_r=inner_bot_r,
         )
 
+def detect_body(bin_im, inner_top_l, inner_top_r):
+    body = bin_im[:, inner_top_l.col:inner_top_r.col]
+    rows, cols = np.where(body == 1)
+    col = int(np.mean(cols))
+    middle = int(np.mean(rows))
+
+    top = np.where(body[:middle, col] == 1)[0][0]
+    bot = np.where(body[middle:, col] == 0)[0][0] + middle
+    return Point(top, col + inner_top_l.col), Point(bot, col + inner_top_l.col)
 
 def remove_antenna(half_binary):
     """Remove antenna if connected to the wing
@@ -169,13 +233,11 @@ def remove_antenna(half_binary):
         binary image, same shape as input without antenna (if it touches the
         wing)
     """
-
     markers, _ = sp.ndimage.label(
         1 - half_binary,
         sp.ndimage.generate_binary_structure(2, 1)
     )
     regions = measure.regionprops(markers)
-
     areas = np.array([r.area for r in regions])
     idx_sorted = 1 + np.argsort(-areas)[:2]
 
@@ -281,6 +343,12 @@ def detect_inner_pix(half_binary, outer_pix: Point, side: str) -> Point:
 
     return Point(*inner_pix)
 
+def detect_inner_bottom(half_binary, inner_top: Point, side: str) -> Point:
+
+    rows = np.where(1-half_binary[inner_top.row+1:, inner_top.col])[0]
+
+    row, col = rows[0] + inner_top.row, inner_top.col
+    return Point(row, col)
 
 def split_picture(binary):
     """Calculate the middle of the butterfly.
@@ -305,5 +373,3 @@ def split_picture(binary):
     column_idxs = np.arange(binary.shape[1])
     column_centroid = np.sum(column_weights_normalized * column_idxs)
     return int(column_centroid)
-
-
