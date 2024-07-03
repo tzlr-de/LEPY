@@ -5,9 +5,13 @@ import scalebar
 
 from mothseg import PointsOfInterest
 
-def plot(ims, contour, stats, pois: T.Optional[PointsOfInterest] = None):
+def plot(ims, contour, stats, pois: T.Optional[PointsOfInterest] = None, calib_result: T.Optional[scalebar.Result] = None):
 
-    fig, axs = plt.subplots(nrows=1, ncols=len(ims), figsize=(16,9), squeeze=False)
+    ncols = len(ims)
+    if calib_result is not None:
+        ncols += 1
+
+    fig, axs = plt.subplots(nrows=1, ncols=ncols, figsize=(16,9), squeeze=False)
 
     for _, _im in enumerate(ims):
         ax = axs[np.unravel_index(_, axs.shape)]
@@ -44,6 +48,17 @@ def plot(ims, contour, stats, pois: T.Optional[PointsOfInterest] = None):
                         verticalalignment='top',
                         fontsize=10,
                 )
+
+    if calib_result is not None:
+        images = calib_result.images
+
+        ax = axs[np.unravel_index(ncols-1, axs.shape)]
+        scalebar_crop = calib_result.position.crop(images.equalized)
+        ax.imshow(scalebar_crop, cmap=plt.cm.gray)
+        ys, xs = calib_result.distances.corners.transpose(1, 0)
+        ax.scatter(xs, ys, marker="o", c="red")
+
+        ax.set_title(f"Detected scalebar: \n{calib_result.scale:.2f} px/mm")
 
     plt.tight_layout()
     return fig

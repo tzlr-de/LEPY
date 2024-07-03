@@ -8,10 +8,10 @@ from matplotlib.pyplot import imread
 
 from mothseg.poi import PointsOfInterest
 from mothseg.segmentation import segment
-from mothseg.output_writer import OutputWriter
+from mothseg.output_writer import Plotter
 
 class Worker:
-    def __init__(self, config, plotter: OutputWriter = None, *,
+    def __init__(self, config, plotter: Plotter = None, *,
                 progress_callback=None,
                 raise_on_error=False):
 
@@ -50,13 +50,16 @@ class Worker:
         # stats.update({"orig-image-width": orig_im_W, "orig-image-height": orig_im_H, "rescale-factor": rescale})
 
         calib_config = self.config.calibration
+        res = None
         if calib_config.enabled:
             self.callback(f"[{imname}] Calibrating image")
+
+            scalebar_location = scalebar.Position.get(calib_config.position) if "position" in calib_config else None
             res = scalebar.Result.new(impath,
                                     scalebar_size=Size.get(calib_config.scalebar_size),
                                     max_corners=50,
                                     size_per_square=calib_config.square_size,
-                                    scalebar_location=scalebar.Position.get(calib_config.position),
+                                    scalebar_location=scalebar_location,
                                     )
 
             if self.plotter is not None:
@@ -87,6 +90,9 @@ class Worker:
 
         self.callback(f"[{imname}] Plotting results")
         if self.plotter is not None:
-            self.plotter.plot(impath, [im, bin_im, chan], contour, stats, pois=pois)
+            self.plotter.plot(impath, [im, bin_im, chan], contour, stats,
+                              pois=pois,
+                              calib_result=res,
+                              )
 
         return stats

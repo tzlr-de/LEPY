@@ -117,9 +117,9 @@ class Plotter(BaseWriter):
         super().__init__(folder)
         self._plot_interm = plot_interm
 
-    def plot(self, impath: str, ims, contour, stats, pois: PointsOfInterest):
+    def plot(self, impath: str, ims, contour, stats, pois: PointsOfInterest, calib_result: scalebar.Result = None):
         dest = self.new_path(impath, ".png", subfolder="visualizations")
-        fig = vis.plot(ims, contour, stats, pois=pois)
+        fig = vis.plot(ims, contour, stats, pois=pois, calib_result=calib_result)
         if dest is not None:
             fig.savefig(dest)
         else:
