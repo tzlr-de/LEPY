@@ -52,13 +52,21 @@ def plot(ims, contour, stats, pois: T.Optional[PointsOfInterest] = None, calib_r
                 )
 
     if calib_result is not None:
-        images = calib_result.images
 
-        ax = plt.subplot(spec[:, 1]) #axs[np.unravel_index(ncols-1, axs.shape)]
-        scalebar_crop = calib_result.position.crop(images.equalized)
+        ax = plt.subplot(spec[:, 1])
+        scalebar_crop = calib_result.scalebar
         ax.imshow(scalebar_crop, cmap=plt.cm.gray)
-        ys, xs = calib_result.distances.corners.transpose(1, 0)
-        ax.scatter(xs, ys, marker="o", c="red")
+
+        corners = calib_result.distances.corners
+        mask = np.zeros(len(corners), dtype=bool)
+        selected_corners, pairs = calib_result.best_corners()
+        mask[selected_corners] = True
+
+        ys, xs = corners[mask].transpose(1, 0)
+        ax.scatter(xs, ys, marker="o", c="blue")
+
+        ys, xs = corners[~mask].transpose(1, 0)
+        ax.scatter(xs, ys, marker="o", c="red", alpha=0.5)
 
         ax.set_title(f"Detected scalebar: \n{calib_result.scale:.2f} px/mm")
 
