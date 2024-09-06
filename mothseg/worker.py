@@ -67,14 +67,14 @@ class Worker:
 
             scale = float(res.scale)
             if scale is not None and scale > 0:
-                stats['calibration-length'] = scale
-                stats['calibration-pos-x'] = int(res.position.x)
-                stats['calibration-pos-y'] = int(res.position.y)
-                stats['calibration-pos-w'] = int(res.position.width)
-                stats['calibration-pos-h'] = int(res.position.height)
-                stats['contour-area-calibrated'] = stats['contour-area'] / scale ** 2
-                stats['width-calibrated'] = (stats['contour-xmax'] - stats['contour-xmin']) / scale
-                stats['height-calibrated'] = (stats['contour-ymax'] - stats['contour-ymin']) / scale
+                stats['calibration_length'] = scale
+                stats['calibration_pos_x'] = int(res.position.x)
+                stats['calibration_pos_y'] = int(res.position.y)
+                stats['calibration_pos_w'] = int(res.position.width)
+                stats['calibration_pos_h'] = int(res.position.height)
+                stats['contour_area_calibrated'] = stats['contour_area'] / scale ** 2
+                stats['width_calibrated'] = (stats['contour_xmax'] - stats['contour_xmin']) / scale
+                stats['height_calibrated'] = (stats['contour_ymax'] - stats['contour_ymin']) / scale
 
         pois = None
         if self.config.points_of_interest.enabled:

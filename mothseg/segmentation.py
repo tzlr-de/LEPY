@@ -46,29 +46,29 @@ def segment(im, *, method: str = "grabcut+otsu",
 
     stats = {
 
-        'median-intensity': float(np.median(V)),
-        'mean-intensity': float(np.mean(V)),
-        'stddev-intensity': float(np.std(V)),
-        'median-saturation': float(np.median(S)),
-        'mean-saturation': float(np.mean(S)),
-        'stddev-saturation': float(np.std(S)),
-        'median-hue': float(np.median(H)),
-        'mean-hue': float(np.mean(H)),
-        'stddev-hue': float(np.std(H)),
-        'image-width': int(width / rescale),
-        'image-height': int(height / rescale),
+        'median_intensity': float(np.median(V)),
+        'mean_intensity': float(np.mean(V)),
+        'stddev_intensity': float(np.std(V)),
+        'median_saturation': float(np.median(S)),
+        'mean_saturation': float(np.mean(S)),
+        'stddev_saturation': float(np.std(S)),
+        'median_hue': float(np.median(H)),
+        'mean_hue': float(np.mean(H)),
+        'stddev_hue': float(np.std(H)),
+        'image_width': int(width / rescale),
+        'image_height': int(height / rescale),
         # these two do not make sense to me
-        # 'seg-absolute-size': len(V),
-        # 'seg-relative-size': len(V) / float( hsv_im.shape[0] * hsv_im.shape[1] ),
+        # 'seg_absolute_size': len(V),
+        # 'seg_relative_size': len(V) / float( hsv_im.shape[0] * hsv_im.shape[1] ),
 
-        'contour-length': len(largest_contour),
-        'contour-area': cv2.contourArea(largest_contour),
+        'contour_length': len(largest_contour),
+        'contour_area': cv2.contourArea(largest_contour),
 
         # compute bounding box
-        'contour-xmin': int(np.amin( largest_contour[:, 0, 0] )),
-        'contour-xmax': int(np.amax( largest_contour[:, 0, 0] )),
-        'contour-ymin': int(np.amin( largest_contour[:, 0, 1] )),
-        'contour-ymax': int(np.amax( largest_contour[:, 0, 1] )),
+        'contour_xmin': int(np.amin( largest_contour[:, 0, 0] )),
+        'contour_xmax': int(np.amax( largest_contour[:, 0, 0] )),
+        'contour_ymin': int(np.amin( largest_contour[:, 0, 1] )),
+        'contour_ymax': int(np.amax( largest_contour[:, 0, 1] )),
 
     }
 
