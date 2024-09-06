@@ -3,7 +3,6 @@ import numpy as np
 import scalebar
 
 from pathlib import Path
-from scalebar.core.size import Size
 from matplotlib.pyplot import imread
 
 from mothseg.poi import PointsOfInterest
@@ -54,12 +53,16 @@ class Worker:
         if calib_config.enabled:
             self.callback(f"[{imname}] Calibrating image")
 
-            scalebar_location = scalebar.Position.get(calib_config.position) if "position" in calib_config else None
+            scalebar_location = None
+            if "position" in calib_config and calib_config.position is not None:
+                scalebar_location = scalebar.Position.get(calib_config.position)
+
             res = scalebar.Result.new(impath,
-                                    scalebar_size=Size.get(calib_config.scalebar_size),
-                                    max_corners=50,
-                                    size_per_square=calib_config.square_size,
-                                    scalebar_location=scalebar_location,
+                                      template_path=calib_config.template_path,
+                                      roi_fraction=calib_config.roi_fraction,
+                                      max_corners=50,
+                                      size_per_square=calib_config.square_size,
+                                      scalebar_location=scalebar_location,
                                     )
 
             if self.plotter is not None:

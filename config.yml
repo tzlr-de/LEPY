@@ -3,9 +3,10 @@ segmentation:
 
 calibration:
   enabled: True
-  scalebar_size: MEDIUM # rough estimate of the scalebar size - SMALL: 10%, MEDIUM: 30%, or LARGE: 50% of the smallest dimension of the image
+  roi_fraction: 0.15
   square_size: 1.0 # in mm
-  position: bottom_left # position of the scalebar in the image
+  position: null # position of the scalebar in the image
+  template_path: scalebar_template.jpg
 
 points_of_interest:
   enabled: True
