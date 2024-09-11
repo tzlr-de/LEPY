@@ -3,5 +3,5 @@ tqdm
 pyyaml
 munch
 
-scalebar~=0.4.2
+scalebar~=0.5.2
 cvargparse

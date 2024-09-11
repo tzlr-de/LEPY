@@ -11,6 +11,10 @@ def plot(ims, contour, stats, pois: T.Optional[PointsOfInterest] = None, calib_r
     ncols = 1
     if calib_result is not None:
         ncols += 1
+
+    if calib_result.match is not None:
+        ncols += 1
+
     fig = plt.figure(figsize=(16,9))
     spec = plt.GridSpec(nrows=nrows, ncols=ncols, figure=fig)
     #fig, axs = plt.subplots(nrows=nrows, ncols=ncols, figsize=(16,9), squeeze=False)
@@ -56,19 +60,31 @@ def plot(ims, contour, stats, pois: T.Optional[PointsOfInterest] = None, calib_r
         ax = plt.subplot(spec[:, 1])
         scalebar_crop = calib_result.scalebar
         ax.imshow(scalebar_crop, cmap=plt.cm.gray)
-
-        corners = calib_result.distances.corners
-        mask = np.zeros(len(corners), dtype=bool)
-        selected_corners, pairs = calib_result.best_corners()
-        mask[selected_corners] = True
-
-        ys, xs = corners[mask].transpose(1, 0)
-        ax.scatter(xs, ys, marker="o", c="blue")
-
-        ys, xs = corners[~mask].transpose(1, 0)
-        ax.scatter(xs, ys, marker="o", c="red", alpha=0.5)
-
         ax.set_title(f"Detected scalebar: \n{calib_result.scale:.2f} px/mm")
+
+        if calib_result.distances is not None:
+            corners = calib_result.distances.corners
+            mask = np.zeros(len(corners), dtype=bool)
+            selected_corners, pairs = calib_result.best_corners()
+            mask[selected_corners] = True
+
+            ys, xs = corners[mask].transpose(1, 0)
+            ax.scatter(xs, ys, marker="o", c="blue")
+
+            ys, xs = corners[~mask].transpose(1, 0)
+            ax.scatter(xs, ys, marker="o", c="red", alpha=0.5)
+
+        if calib_result.match is not None:
+            ax = plt.subplot(spec[0, 2])
+            templ = calib_result.template
+            ax.imshow(templ, cmap=plt.cm.gray)
+            ax.set_title("Artifitial scalebar template")
+
+            ax = plt.subplot(spec[1:, 2])
+            match = calib_result.match
+            ax.imshow(_im)
+            ax.imshow(match, cmap=plt.cm.gray, alpha=0.5)
+            ax.set_title("Template matches")
 
     plt.tight_layout()
     return fig

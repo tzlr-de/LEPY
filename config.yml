@@ -3,10 +3,12 @@ segmentation:
 
 calibration:
   enabled: True
+  max_corners: 50
   roi_fraction: 0.15
   square_size: 1.0 # in mm
   position: null # position of the scalebar in the image
   template_path: scalebar_template.jpg
+  template_scale: 290.0 # in pixels per mm
 
 points_of_interest:
   enabled: True

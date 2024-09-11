@@ -59,8 +59,9 @@ class Worker:
 
             res = scalebar.Result.new(impath,
                                       template_path=calib_config.template_path,
+                                      template_scale=calib_config.template_scale,
                                       roi_fraction=calib_config.roi_fraction,
-                                      max_corners=50,
+                                      max_corners=calib_config.max_corners,
                                       size_per_square=calib_config.square_size,
                                       scalebar_location=scalebar_location,
                                     )
