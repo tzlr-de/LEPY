@@ -8,6 +8,7 @@ from matplotlib.pyplot import imread
 from mothseg.poi import PointsOfInterest
 from mothseg.segmentation import segment
 from mothseg.output_writer import Plotter
+from mothseg.outputs import OUTPUTS as OUTS
 
 class Worker:
     def __init__(self, config, plotter: Plotter = None, *,
@@ -71,14 +72,14 @@ class Worker:
 
             scale = float(res.scale)
             if scale is not None and scale > 0:
-                stats['calibration_length'] = scale
-                stats['calibration_pos_x'] = int(res.position.x)
-                stats['calibration_pos_y'] = int(res.position.y)
-                stats['calibration_pos_w'] = int(res.position.width)
-                stats['calibration_pos_h'] = int(res.position.height)
-                stats['contour_area_calibrated'] = stats['contour_area'] / scale ** 2
-                stats['width_calibrated'] = (stats['contour_xmax'] - stats['contour_xmin']) / scale
-                stats['height_calibrated'] = (stats['contour_ymax'] - stats['contour_ymin']) / scale
+                stats[OUTS.calibration.length] = scale
+                stats[OUTS.calibration.pos.x] = int(res.position.x)
+                stats[OUTS.calibration.pos.y] = int(res.position.y)
+                stats[OUTS.calibration.pos.w] = int(res.position.width)
+                stats[OUTS.calibration.pos.h] = int(res.position.height)
+                stats[OUTS.contour.area_calibrated] = stats[OUTS.contour.area] / scale ** 2
+                stats[OUTS.contour.width_calibrated] = (stats[OUTS.contour.xmax] - stats[OUTS.contour.xmin]) / scale
+                stats[OUTS.contour.height_calibrated] = (stats[OUTS.contour.ymax] - stats[OUTS.contour.ymin]) / scale
 
         pois = None
         if self.config.points_of_interest.enabled:

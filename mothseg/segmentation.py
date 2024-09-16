@@ -5,6 +5,7 @@ import scipy as sp
 
 from mothseg import utils
 from mothseg.binarization import binarize
+from mothseg.outputs import OUTPUTS as OUTS
 
 
 def segment(im, *, method: str = "grabcut+otsu",
@@ -46,29 +47,21 @@ def segment(im, *, method: str = "grabcut+otsu",
 
     stats = {
 
-        'median_intensity': float(np.median(V)),
-        'mean_intensity': float(np.mean(V)),
-        'stddev_intensity': float(np.std(V)),
-        'median_saturation': float(np.median(S)),
-        'mean_saturation': float(np.mean(S)),
-        'stddev_saturation': float(np.std(S)),
-        'median_hue': float(np.median(H)),
-        'mean_hue': float(np.mean(H)),
-        'stddev_hue': float(np.std(H)),
-        'image_width': int(width / rescale),
-        'image_height': int(height / rescale),
-        # these two do not make sense to me
-        # 'seg_absolute_size': len(V),
-        # 'seg_relative_size': len(V) / float( hsv_im.shape[0] * hsv_im.shape[1] ),
+        **OUTS.hue.calc_stats(H),
+        **OUTS.saturation.calc_stats(S),
+        **OUTS.intensity.calc_stats(V),
 
-        'contour_length': len(largest_contour),
-        'contour_area': cv2.contourArea(largest_contour),
+        OUTS.image.width: int(width / rescale),
+        OUTS.image.height: int(height / rescale),
+
+        OUTS.contour.length: len(largest_contour),
+        OUTS.contour.area: cv2.contourArea(largest_contour),
 
         # compute bounding box
-        'contour_xmin': int(np.amin( largest_contour[:, 0, 0] )),
-        'contour_xmax': int(np.amax( largest_contour[:, 0, 0] )),
-        'contour_ymin': int(np.amin( largest_contour[:, 0, 1] )),
-        'contour_ymax': int(np.amax( largest_contour[:, 0, 1] )),
+        OUTS.contour.xmin: int(np.amin( largest_contour[:, 0, 0] )),
+        OUTS.contour.xmax: int(np.amax( largest_contour[:, 0, 0] )),
+        OUTS.contour.ymin: int(np.amin( largest_contour[:, 0, 1] )),
+        OUTS.contour.ymax: int(np.amax( largest_contour[:, 0, 1] )),
 
     }
 

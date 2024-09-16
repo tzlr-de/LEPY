@@ -9,6 +9,7 @@ from pathlib import Path
 
 from mothseg import PointsOfInterest
 from mothseg import visualization as vis
+from mothseg.outputs import OUTPUTS
 
 class BaseWriter:
 
@@ -31,6 +32,7 @@ class BaseWriter:
             subpath.mkdir(exist_ok=True, parents=True)
             return subpath / new_path
 
+
 class OutputWriter(BaseWriter):
 
     def __init__(self, folder: str, *, store_to_csv: bool = True, config = None) -> None:
@@ -45,39 +47,36 @@ class OutputWriter(BaseWriter):
 
             self.header = [
                 "Code",
-                # "orig-image-width", "orig-image-height", "rescale-factor",
-                "image-width", "image-height",
 
-                "median-intensity", "mean-intensity", "stddev-intensity",
-                "median-saturation", "mean-saturation", "stddev-saturation",
-                "median-hue", "mean-hue", "stddev-hue",
+                OUTPUTS.image.width, OUTPUTS.image.height,
+                OUTPUTS.intensity.median, OUTPUTS.intensity.mean, OUTPUTS.intensity.stddev,
+                OUTPUTS.saturation.median, OUTPUTS.saturation.mean, OUTPUTS.saturation.stddev,
+                OUTPUTS.hue.median, OUTPUTS.hue.mean, OUTPUTS.hue.stddev,
 
-                # "seg-absolute-size", "seg-relative-size",
+                OUTPUTS.contour.length, OUTPUTS.contour.area,
+                OUTPUTS.contour.xmin, OUTPUTS.contour.xmax,
+                OUTPUTS.contour.ymin, OUTPUTS.contour.ymax,
+                OUTPUTS.contour.area_calibrated,
+                OUTPUTS.contour.width_calibrated,
+                OUTPUTS.contour.height_calibrated,
 
-                "contour-length", "contour-area", "contour-xmin", "contour-xmax", "contour-ymin", "contour-ymax",
-                "contour-area-calibrated", "width-calibrated", "height-calibrated",
-                "calibration-length", "calibration-pos-x", "calibration-pos-y", "calibration-pos-w", "calibration-pos-h",
+                OUTPUTS.calibration.length,
+                OUTPUTS.calibration.pos.x, OUTPUTS.calibration.pos.y,
+                OUTPUTS.calibration.pos.w, OUTPUTS.calibration.pos.h,
 
-                "poi-area-body", "poi-area-wing_l", "poi-area-wing_r",
+                OUTPUTS.poi.area.body, OUTPUTS.poi.area.wing_l, OUTPUTS.poi.area.wing_r,
 
-                # "poi-dist-center-outer_l",
-                # "poi-dist-center-outer_r",
-                "poi-dist-inner-outer_l",
-                "poi-dist-inner-outer_r",
-                "poi-dist-inner", "poi-dist-body",
+                OUTPUTS.poi.dist.inner_outer_l, OUTPUTS.poi.dist.inner_outer_r,
+                OUTPUTS.poi.dist.inner, OUTPUTS.poi.dist.body,
 
-                "poi-orig_width", "poi-orig_height",
-                "poi-center-x", "poi-center-y",
-                "poi-body_top-x", "poi-body_top-y",
-                "poi-body_bot-x", "poi-body_bot-y",
-                "poi-outer_l-x", "poi-outer_l-y",
-                "poi-outer_r-x", "poi-outer_r-y",
-                "poi-inner_top_l-x", "poi-inner_top_l-y",
-                "poi-inner_top_r-x", "poi-inner_top_r-y",
-                "poi-inner_bot_l-x", "poi-inner_bot_l-y",
-                "poi-inner_bot_r-x", "poi-inner_bot_r-y",
+                OUTPUTS.poi.orig_width, OUTPUTS.poi.orig_height,
+                OUTPUTS.poi.center.x, OUTPUTS.poi.center.y,
+                OUTPUTS.poi.body_top.x, OUTPUTS.poi.body_top.y,
+                OUTPUTS.poi.body_bot.x, OUTPUTS.poi.body_bot.y,
+                OUTPUTS.poi.outer_l.x, OUTPUTS.poi.outer_l.y, OUTPUTS.poi.outer_r.x, OUTPUTS.poi.outer_r.y,
+                OUTPUTS.poi.inner_top_l.x, OUTPUTS.poi.inner_top_l.y, OUTPUTS.poi.inner_top_r.x, OUTPUTS.poi.inner_top_r.y,
+                OUTPUTS.poi.inner_bot_l.x, OUTPUTS.poi.inner_bot_l.y, OUTPUTS.poi.inner_bot_r.x, OUTPUTS.poi.inner_bot_r.y,
             ]
-
 
             self.write_csv_row(self.header)
 

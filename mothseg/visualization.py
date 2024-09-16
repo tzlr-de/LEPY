@@ -3,7 +3,8 @@ import matplotlib.pyplot as plt
 import typing as T
 import scalebar
 
-from mothseg import PointsOfInterest
+from mothseg.poi import PointsOfInterest
+from mothseg.outputs import OUTPUTS as OUTS
 
 def plot(ims, contour, stats, pois: T.Optional[PointsOfInterest] = None, calib_result: T.Optional[scalebar.Result] = None):
 
@@ -24,16 +25,16 @@ def plot(ims, contour, stats, pois: T.Optional[PointsOfInterest] = None, calib_r
 
         ax.imshow(_im)
         ax.plot(contour[:, 0], contour[:, 1], linewidth=2, alpha=0.6)
-        x0, y0, x1, y1 = stats['contour_xmin'], stats['contour_ymin'], stats['contour_xmax'], stats['contour_ymax']
+        x0, y0, x1, y1 = stats[OUTS.contour.xmin], stats[OUTS.contour.ymin], stats[OUTS.contour.xmax], stats[OUTS.contour.ymax]
 
         ax.add_patch(plt.Rectangle((x0, y0), x1 - x0, y1 - y0, fill=None, edgecolor='m', linewidth=1))
         ax.annotate("", xy=(x0, y1), xytext=(x1, y1),
                     arrowprops=dict(arrowstyle='<->'))
 
-        if 'calibration_length' not in stats:
+        if OUTS.calibration.length not in stats:
             lengthx = '{:.0f} pixels'.format(x1 - x0)
         else:
-            lengthx = '{:.2f} mm'.format(stats['width_calibrated'])
+            lengthx = '{:.2f} mm'.format(stats[OUTS.contour.width_calibrated])
 
         ax.text(0.5 * (x1 + x0), y1 + 20,
                  lengthx,
@@ -45,7 +46,7 @@ def plot(ims, contour, stats, pois: T.Optional[PointsOfInterest] = None, calib_r
 
             for key, p0, p1 in pois.named_distances:
                 dist = stats[key]
-                unit = "px" if 'calibration_length' not in stats else "mm"
+                unit = "px" if OUTS.calibration.length not in stats else "mm"
                 ax.annotate("", xy=(p0.col, p0.row), xytext=(p1.col, p1.row),
                             arrowprops=dict(arrowstyle='<->'))
                 ax.text(x=(p0.col + p1.col)/2, y=(p0.row + p1.row)/2 + 15,
