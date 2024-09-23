@@ -1,5 +1,15 @@
+reading:
+  rgb_regex: (.+)\.tif
+  uv_regex: (.+)uv\.tif
+  uv_channel_index: 0
+
+  extensions: [.tif]
+  ordered: false
+
 segmentation:
   method: "grabcut+otsu"
+  channel: saturation
+  rescale: 0.5
 
 calibration:
   enabled: True

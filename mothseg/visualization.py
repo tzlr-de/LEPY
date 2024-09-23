@@ -2,11 +2,124 @@ import numpy as np
 import matplotlib.pyplot as plt
 import typing as T
 import scalebar
+import cv2
 
 from mothseg.poi import PointsOfInterest
 from mothseg.outputs import OUTPUTS as OUTS
+from mothseg.image import ColorStats
+from mothseg.image import Image
 
-def plot(ims, contour, stats, pois: T.Optional[PointsOfInterest] = None, calib_result: T.Optional[scalebar.Result] = None):
+def plot(image: Image, ims, *,
+         pois: T.Optional[PointsOfInterest] = None,
+         calib_result: T.Optional[scalebar.Result] = None,
+         col_stats: T.Optional[ColorStats] = None,
+         colored_rgb: bool = False) -> plt.Figure:
+
+    im, uv, mask = image.rgb_im, image.uv_im, image.mask
+
+    gray = image.gray_im
+    intensity_img = image.intensity_im
+
+    fig = plt.figure(figsize=(16, 9))
+    grid = plt.GridSpec(5, 7, figure=fig)
+
+    saturation = cv2.cvtColor(im, cv2.COLOR_RGB2HSV)[:, :, 1]
+    saturation -= saturation.min()
+    saturation = (saturation / saturation.max() * 255).astype(np.uint8)
+
+    ims = [im, uv, gray, saturation, mask]
+    titles = ["RGB image", "UV image", "B/W image", "Saturation",  "Mask"]
+    for i, (chan, title) in enumerate(zip(ims, titles)):
+        ax = plt.subplot(grid[0, i])
+        if chan.ndim == 2:
+            ax.imshow(chan, cmap="gray")
+        else:
+            ax.imshow(chan)
+        ax.set_title(title)
+        ax.axis("off")
+
+    colors = ["red", "green", "blue", "purple", "black"]
+    titles = ["Red channel", "Green channel", "Blue channel", "UV channel", "B/W + UV image"]
+
+    R, G, B = im.transpose(2, 0, 1)
+    channels = [R, G, B, uv, intensity_img]
+    # cmaps = ["Reds", "Greens", "Blues", "Purples", "Greys"]
+    # cmaps = ["Reds_r", "Greens_r", "Blues_r", "Purples_r", "Greys_r"]
+    cmaps = ["gray", "gray", "gray", "gray", "gray"]
+    boxplot_ax = plt.subplot(grid[4, :5])
+    tab_ax = plt.subplot(grid[4, 5])
+    hist_ax = plt.subplot(grid[2:4, :5])
+
+    rows = []
+    for i, (stat, col, chan, title, cmap) in enumerate(zip(col_stats, colors, channels, titles, cmaps)):
+        hist, q25, q75, median, iqr = stat
+
+        hist_ax.plot(col_stats.bins[:-1], hist, color=col, label=title)
+        hist_ax.fill_between(col_stats.bins[:-1], hist, color=col, alpha=0.3)
+
+        ax = plt.subplot(grid[1, i])
+
+        if i < 3 and colored_rgb:
+            _chan = np.full_like(im, 0, dtype=np.uint8)
+            _chan[..., i] = chan
+            ax.imshow(_chan * mask[..., None])
+        else:
+            ax.imshow(chan * mask, cmap=cmap)
+
+        _title_obj = ax.set_title(f"{title}\n(masked)")
+        _title_obj.set_color(col)
+        ax.axis("off")
+
+        # ax = plt.subplot(grid[2, i])
+        boxplot_ax.boxplot(chan[mask != 0], patch_artist=True,
+                           vert=False,
+                           widths=0.7,
+                           boxprops=dict(facecolor=col),
+                           medianprops=dict(color='yellow'),
+                           positions=[len(channels) - i],
+                           showfliers=False)
+
+        rows.append([title, int(q25), int(median), int(q75), int(iqr)])
+        # boxplot_ax.set_title(f"Q25: {q25:.0f}, Q75: {q75:.0f}\nMedian: {median:.0f}, IQR: {iqr:.0f}")
+        # boxplot_ax.axis("off")
+
+    tab_ax.axis("off")
+    tab_ax.axis("tight")
+    tab  = tab_ax.table(cellText=[row[1:] for row in rows],
+                 colLabels=[
+                    #  "Channel",
+                    "Q25", "Median", "Q75", "IQR"],
+                 colLoc="center",
+                 cellLoc="center",
+                 loc="center",
+                 edges="horizontal",
+                 fontsize=72,
+                 )
+    tab.auto_set_font_size(False)
+    tab.set_fontsize(10)
+    tab.scale(1, 1.5)
+
+    # print(tabulate(rows, headers=["Channel", "Q25", "Median", "Q75", "IQR"], tablefmt="fancy_grid"))
+    # boxplot_ax.grid()
+    boxplot_ax.set_xlim(-1, 256)
+    boxplot_ax.set_xticks(np.linspace(0, 256, 5))
+    boxplot_ax.set_xticks(np.linspace(0, 256, 5*5), minor=True)
+    boxplot_ax.set_yticklabels(titles)
+
+    # hist_ax.grid()
+    hist_ax.set_xlim(-1, 256)
+    hist_ax.set_xticks(np.linspace(0, 256, 5))
+    hist_ax.set_xticks(np.linspace(0, 256, 5*5), minor=True)
+    hist_ax.legend()
+
+    plt.tight_layout()
+    return fig
+
+
+
+
+    stats = image.stats
+    contour = image.contour
 
     nrows = len(ims)
     ncols = 1

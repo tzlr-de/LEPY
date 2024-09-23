@@ -13,6 +13,7 @@ from tqdm.auto import tqdm
 import mothseg
 from mothseg import parser
 from mothseg import utils
+from mothseg.image import Image
 
 
 def proceed_check(yes: bool) -> bool:
@@ -21,10 +22,10 @@ def proceed_check(yes: bool) -> bool:
 
 def main(args):
     config = utils.read_config(args.config)
-    images = utils.find_images(args.folder)
+    images = utils.find_images(args.folder, config=config.reading)
 
     logging.info(f"Found {len(images):,d} images in {args.folder}")
-    first10 = '\n'.join(map(str, images[:10]))
+    first10 = '\n'.join(map(str, list(images.keys())[:10]))
     logging.debug(f"Here are the first 10: \n{first10}")
 
     if not proceed_check(args.yes):
@@ -59,13 +60,14 @@ def main(args):
                         progress_callback=None if pool is not None else bar.set_description,
                         raise_on_error=args.raise_on_error)
 
-        for impath, stats, e in mapper(worker, images):
-            bar.set_description(f"Processing {Path(impath).name}")
+        for key, stats, e in mapper(worker, images.items()):
+            image: Image = images[key]
+            bar.set_description(f"Processing {key}")
             if e is not None:
-                writer.log_fail(impath, e)
+                writer.log_fail(image.rgb_fname, e)
                 continue
             assert stats is not None
-            writer(impath, stats)
+            writer(image.rgb_fname, stats)
             bar.update(1)
 
     if pool is not None:

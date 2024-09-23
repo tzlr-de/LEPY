@@ -9,6 +9,8 @@ from pathlib import Path
 
 from mothseg import PointsOfInterest
 from mothseg import visualization as vis
+from mothseg.image import ColorStats
+from mothseg.image import Image
 from mothseg.outputs import OUTPUTS
 
 class BaseWriter:
@@ -116,9 +118,15 @@ class Plotter(BaseWriter):
         super().__init__(folder)
         self._plot_interm = plot_interm
 
-    def plot(self, impath: str, ims, contour, stats, pois: PointsOfInterest, calib_result: scalebar.Result = None):
-        dest = self.new_path(impath, ".png", subfolder="visualizations")
-        fig = vis.plot(ims, contour, stats, pois=pois, calib_result=calib_result)
+    def plot(self, image: Image, ims, *,
+             pois: PointsOfInterest, calib_result: scalebar.Result = None,
+             col_stats: ColorStats = None):
+
+        dest = self.new_path(image.rgb_path, ".png", subfolder="visualizations")
+        fig = vis.plot(image, ims, 
+                       pois=pois, calib_result=calib_result,
+                       col_stats=col_stats,
+                       )
         if dest is not None:
             fig.savefig(dest)
         else:

@@ -10,7 +10,7 @@ from mothseg.outputs import OUTPUTS as OUTS
 
 def segment(im, *, method: str = "grabcut+otsu",
             rescale: T.Optional[float] = None,
-            channel: str = "saturation",
+            channel: T.Union[str, np.ndarray] = "saturation",
             ksize: T.Optional[int] = None,
             fill_holes: bool = True):
 
@@ -23,14 +23,26 @@ def segment(im, *, method: str = "grabcut+otsu",
     height, width, *_ = hsv_im.shape
     H, S, V = hsv_im.transpose(2, 0, 1)
 
-    chan = {
-        "hue": H,
-        "saturation": S,
-        "intensity": V,
-        "value": V,
-        "gray": V,
-        "grey": V,
-    }.get(channel)
+    if isinstance(channel, str):
+        channel = channel.lower()
+
+        chan = {
+            "hue": H,
+            "saturation": S,
+            "intensity": V,
+            "value": V,
+            "gray": V,
+            "grey": V,
+        }.get(channel)
+    elif isinstance(channel, np.ndarray):
+
+        if rescale is not None and 0 < rescale < 1.0:
+            channel = utils.rescale(channel, rescale)
+        assert channel.shape[:2] == im.shape[:2], \
+            f"Channel shape {channel.shape[:2]} does not match image shape {im.shape[:2]}"
+        chan = channel
+    else:
+        raise ValueError(f"Invalid channel type: {type(channel)}")
 
     assert chan is not None, \
         f"Could not select desired channel: {channel}"
