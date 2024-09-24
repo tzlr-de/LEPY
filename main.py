@@ -3,7 +3,6 @@
 if __name__ != '__main__':
     raise Exception("Do not import me!")
 
-from pathlib import Path
 import logging
 
 

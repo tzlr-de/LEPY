@@ -2,38 +2,11 @@ import json
 import csv
 import shutil
 import datetime as dt
-import scalebar
 
-from matplotlib import pyplot as plt
 from pathlib import Path
 
-from mothseg import PointsOfInterest
-from mothseg import visualization as vis
-from mothseg.image import ColorStats
-from mothseg.image import Image
 from mothseg.outputs import OUTPUTS
-
-class BaseWriter:
-
-    def __init__(self, folder: str) -> None:
-        if folder is None:
-            self.root = None
-        else:
-            self.root = Path(folder)
-            self.root.mkdir(exist_ok=True, parents=True)
-
-    def new_path(self, impath: str, new_suffix: str, *, subfolder: str = None):
-        if self.root is None:
-            return None
-
-        new_path = Path(impath).with_suffix(new_suffix).name
-        if subfolder is None:
-            return self.root / new_path
-        else:
-            subpath = self.root / subfolder
-            subpath.mkdir(exist_ok=True, parents=True)
-            return subpath / new_path
-
+from mothseg.output_writer.base import BaseWriter
 
 class OutputWriter(BaseWriter):
 
@@ -111,36 +84,3 @@ class OutputWriter(BaseWriter):
             msg = f"[{now:%Y-%m-%d %H:%M:%S}] Failed to process \"{impath}\". Reason ({type(err).__name__}): {str(err)}"
             f.write(f"{msg}\n")
             print(msg)
-
-class Plotter(BaseWriter):
-
-    def __init__(self, folder: str, *, plot_interm: bool) -> None:
-        super().__init__(folder)
-        self._plot_interm = plot_interm
-
-    def plot(self, image: Image, ims, *,
-             pois: PointsOfInterest, calib_result: scalebar.Result = None,
-             col_stats: ColorStats = None):
-
-        dest = self.new_path(image.rgb_path, ".png", subfolder="visualizations")
-        fig = vis.plot(image, ims, 
-                       pois=pois, calib_result=calib_result,
-                       col_stats=col_stats,
-                       )
-        if dest is not None:
-            fig.savefig(dest)
-        else:
-            plt.show()
-        plt.close()
-
-
-    def plot_interm(self, impath: str, result: scalebar.Result):
-        if not self._plot_interm:
-            return
-        dest = self.new_path(impath, ".png", subfolder="interm")
-        fig = vis.plot_interm(result)
-        if dest is not None:
-            fig.savefig(dest)
-        else:
-            plt.show()
-        plt.close()
