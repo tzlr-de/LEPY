@@ -62,7 +62,6 @@ class Worker:
         self.callback(f"[{key}] Plotting results")
         if self.plotter is not None:
             self.plotter.plot(image,
-                              [image.rgb_im, image.mask, image.chan],
                               pois=pois,
                               calib_result=calib_result,
                               col_stats=col_stats,
