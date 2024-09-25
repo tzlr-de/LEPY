@@ -28,6 +28,12 @@ class OutputWriter(BaseWriter):
                 OUTPUTS.saturation.median, OUTPUTS.saturation.mean, OUTPUTS.saturation.stddev,
                 OUTPUTS.hue.median, OUTPUTS.hue.mean, OUTPUTS.hue.stddev,
 
+                OUTPUTS.red.median, OUTPUTS.red.Q25, OUTPUTS.red.Q75, OUTPUTS.red.IQR,
+                OUTPUTS.green.median, OUTPUTS.green.Q25, OUTPUTS.green.Q75, OUTPUTS.green.IQR,
+                OUTPUTS.blue.median, OUTPUTS.blue.Q25, OUTPUTS.blue.Q75, OUTPUTS.blue.IQR,
+                OUTPUTS.uv.median, OUTPUTS.uv.Q25, OUTPUTS.uv.Q75, OUTPUTS.uv.IQR,
+                OUTPUTS.black.median, OUTPUTS.black.Q25, OUTPUTS.black.Q75, OUTPUTS.black.IQR,
+
                 OUTPUTS.contour.length, OUTPUTS.contour.area,
                 OUTPUTS.contour.xmin, OUTPUTS.contour.xmax,
                 OUTPUTS.contour.ymin, OUTPUTS.contour.ymax,

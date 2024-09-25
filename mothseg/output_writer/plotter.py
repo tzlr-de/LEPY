@@ -36,7 +36,9 @@ def _plot_images(ims, titles, grid, *, row: int, mask=None, cmaps=None):
         ax.axis("off")
 
 def _plot_histograms(ax, col_stats, *, colors, titles, alpha=0.3):
-    for i, (hist, col, title) in enumerate(zip(col_stats.histograms, colors, titles)):
+    for hist, col, title in zip(col_stats.histograms, colors, titles):
+        if hist is None:
+            continue
         ax.plot(col_stats.bins[:-1], hist, color=col, label=title)
         ax.fill_between(col_stats.bins[:-1], hist, color=col, alpha=alpha)
 
@@ -177,6 +179,7 @@ class Plotter(BaseWriter):
 
         dest = self.new_path(image.rgb_path, ".png", subfolder="visualizations")
 
+
         im, uv, mask = image.rgb_im, image.uv_im, image.mask
 
         gray = image.gray_im
@@ -189,14 +192,26 @@ class Plotter(BaseWriter):
         saturation -= saturation.min()
         saturation = (saturation / saturation.max() * 255).astype(np.uint8)
 
-        _plot_images(ims=[im, uv, gray, saturation, mask],
-                     titles=["RGB image", "UV image", "B/W image", "Saturation",  "Mask"],
-                     grid=grid, row=0)
+        if image.has_uv:
+            images = [im, uv, gray, saturation, mask]
+            titles = ["RGB image", "UV image", "B/W image", "Saturation",  "Mask"]
+        else:
+            images = [im, gray, saturation, mask]
+            titles = ["RGB image", "B/W image", "Saturation", "Mask"]
+
+        _plot_images(ims=images, titles=titles, grid=grid, row=0)
 
         R, G, B = im.transpose(2, 0, 1)
-        channels = [R, G, B, uv, intensity_img]
-        colors = ["red", "green", "blue", "purple", "black"]
-        titles = [ "Red channel", "Green channel", "Blue channel", "UV channel", "B/W + UV image"]
+        if image.has_uv:
+
+            channels = [R, G, B, uv, intensity_img]
+            colors = ["red", "green", "blue", "purple", "black"]
+            titles = [ "Red channel", "Green channel", "Blue channel", "UV channel", "B/W + UV image"]
+        else:
+            channels = [R, G, B, intensity_img]
+            colors = ["red", "green", "blue", "black"]
+            titles = ["Red channel", "Green channel", "Blue channel", "B/W image"]
+
         _plot_images(ims=channels,
                      titles=list(zip(titles, colors)),
                      grid=grid,

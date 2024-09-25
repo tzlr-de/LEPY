@@ -21,15 +21,46 @@ class Box:
 
 @dataclass
 class Statistic:
+    name: str
     median: str
     mean: str
     stddev: str
+
+    Q25: str
+    Q75: str
+    IQR: str
+
+    @classmethod
+    def new(cls, name):
+        return cls(
+            name=name,
+            median=f"{name}_median",
+            mean=f"{name}_mean",
+            stddev=f"{name}_stddev",
+            Q25=f"{name}_Q25",
+            Q75=f"{name}_Q75",
+            IQR=f"{name}_IQR",
+        )
 
     def calc_stats(self, arr) -> dict:
         return {
             self.median: float(np.median(arr)),
             self.mean: float(np.mean(arr)),
             self.stddev: float(np.std(arr)),
+            self.Q25: float(np.percentile(arr, 25)),
+            self.Q75: float(np.percentile(arr, 75)),
+            self.IQR: float(np.percentile(arr, 75) - np.percentile(arr, 25)),
+        }
+
+    @property
+    def key2name(self):
+        return {
+            self.median: f"{self.name} Median",
+            self.mean: f"{self.name} Mean",
+            self.stddev: f"{self.name} Std. dev.",
+            self.Q25: f"{self.name} Q25",
+            self.Q75: f"{self.name} Q75",
+            self.IQR: f"{self.name} IQR",
         }
 
 @dataclass

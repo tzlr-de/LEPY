@@ -10,18 +10,15 @@ from mothseg.output_definitions import PointsOfInterest
 @dataclass
 class Outputs:
     image: Size = Size(width="image_width", height="image_height")
-    intensity: Statistic = Statistic(
-        median="median_intensity",
-        mean="mean_intensity",
-        stddev="stddev_intensity")
-    saturation: Statistic = Statistic(
-        median="median_saturation",
-        mean="mean_saturation",
-        stddev="stddev_saturation")
-    hue: Statistic = Statistic(
-        median="median_hue",
-        mean="mean_hue",
-        stddev="stddev_hue")
+    intensity: Statistic = Statistic.new("intensity")
+    saturation: Statistic = Statistic.new("saturation")
+    hue: Statistic = Statistic.new("hue")
+
+    red: Statistic = Statistic.new("red")
+    green: Statistic = Statistic.new("green")
+    blue: Statistic = Statistic.new("blue")
+    uv: Statistic = Statistic.new("uv")
+    black: Statistic = Statistic.new("black")
 
     contour: Contour = Contour()
     calibration: Calibration = Calibration()
@@ -31,15 +28,14 @@ class Outputs:
         return {
             self.image.width: "Image width",
             self.image.height: "Image height",
-            self.intensity.median: "Median intensity",
-            self.intensity.mean: "Mean intensity",
-            self.intensity.stddev: "Std. dev. intensity",
-            self.saturation.median: "Median saturation",
-            self.saturation.mean: "Mean saturation",
-            self.saturation.stddev: "Std. dev. saturation",
-            self.hue.median: "Median hue",
-            self.hue.mean: "Mean hue",
-            self.hue.stddev: "Std. dev. hue",
+            **self.intensity.key2name,
+            **self.saturation.key2name,
+            **self.hue.key2name,
+            **self.red.key2name,
+            **self.green.key2name,
+            **self.blue.key2name,
+            **self.uv.key2name,
+            **self.black.key2name,
 
             self.contour.area: "Contour area",
             self.contour.width_calibrated: "Wing span",

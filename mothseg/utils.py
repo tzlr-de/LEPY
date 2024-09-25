@@ -51,7 +51,7 @@ def find_images(folder, *, config) -> dict:
             else:
                 curr_file: Image = res[name]
                 if curr_file.key is None:
-                    curr_file.key = key
+                    curr_file.key = name
                 if curr_file.root is None:
                     curr_file.root = Path(root)
                 curr_file.rgb_fname = name

@@ -10,6 +10,7 @@ from matplotlib.pyplot import imread
 import scalebar
 from mothseg.poi import PointsOfInterest
 from mothseg.outputs import OUTPUTS as OUTS
+from mothseg.output_definitions import Statistic
 
 
 @dataclass
@@ -51,8 +52,9 @@ class Image:
 
     @property
     def four_chan_im(self) -> np.ndarray:
-        assert self.uv_im is not None, "UV image is not loaded"
         im, uv, mask = self.rgb_im, self.uv_im, self.mask
+        if not self.has_uv:
+            uv = np.zeros_like(im[..., 0])
 
         if mask is None:
             mask = np.ones(im.shape[:2], dtype=np.uint8)
@@ -76,10 +78,12 @@ class Image:
 
     @property
     def intensity_im(self) -> np.ndarray:
+
         gray_im, uv, mask = self.gray_im, self.uv_im, self.mask
         if mask is None:
             mask = np.ones(gray_im.shape, dtype=np.uint8)
-
+        if uv is None:
+            return gray_im * mask
         res = cv2.addWeighted(gray_im*mask, 0.5, uv*mask, 0.5, 0)
         return res
 
@@ -166,23 +170,44 @@ class Image:
         histograms, q25s, q75s, iqrs, medians = [], [], [], [], []
 
         bins = np.linspace(0, 255, 256//binsize, endpoint=True)
-        def compute(channel):
+        def compute(channel, out_keys: Statistic):
             nonlocal histograms, q25s, q75s, iqrs, medians, binsize
-            hist, _ = np.histogram(channel,
-                                   bins=bins)
-            histograms.append(hist)
+            # we want to show missing UV channel as 0 in the visualization table
             medians.append(np.median(channel))
             q25s.append(np.percentile(channel, 25))
             q75s.append(np.percentile(channel, 75))
             iqrs.append(q75s[-1] - q25s[-1])
 
-        for channel in self.four_chan_im.transpose(2, 0, 1):
+            # ... but we don't want to compute histogram for it
+            # or store 0s in the output CSV table
+            if (channel == 0).all():
+                histograms.append(None)
+                self.stats.update({
+                    out_keys.median: -1,
+                    out_keys.Q25: -1,
+                    out_keys.Q75: -1,
+                    out_keys.IQR: -1,
+                })
+
+            else:
+                hist, _ = np.histogram(channel,
+                                    bins=bins)
+                histograms.append(hist)
+
+                self.stats.update({
+                    out_keys.median: medians[-1],
+                    out_keys.Q25: q25s[-1],
+                    out_keys.Q75: q75s[-1],
+                    out_keys.IQR: iqrs[-1],
+                })
+
+        for channel, out_keys in zip(self.four_chan_im.transpose(2, 0, 1), [OUTS.red, OUTS.green, OUTS.blue, OUTS.uv]):
             if self.mask is not None:
                 channel = channel[self.mask != 0]
 
-            compute(channel)
+            compute(channel, out_keys)
 
-        compute(self.intensity_im[self.mask != 0])
+        compute(self.intensity_im[self.mask != 0], OUTS.black)
 
         return ColorStats(histograms=histograms,
                      q25s=q25s, q75s=q75s,

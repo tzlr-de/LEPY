@@ -3,7 +3,7 @@ reading:
   uv_regex: (.+)uv\.tif
   uv_channel_index: 0
 
-  extensions: [.tif]
+  extensions: [.jpg]
   ordered: false
 
 segmentation:
