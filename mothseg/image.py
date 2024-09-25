@@ -112,7 +112,10 @@ class Image:
             segment(im,
                     channel=channel,
                     rescale=config["rescale"],
-                    method=config["method"])
+                    method=config["method"],
+                    ksize=config.get("ksize"),
+                    fill_holes=config.get("fill_holes", True),
+                    )
 
 
     def calibrate(self, config: T.Dict[str, T.Any]) -> T.Optional[scalebar.Result]:

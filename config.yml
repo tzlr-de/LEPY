@@ -11,6 +11,9 @@ segmentation:
   method: "unet"
   channel: saturation
   rescale: 0.5
+  ksize: null # no smoothing
+  fill_holes: False
+
 
 calibration:
   enabled: True
