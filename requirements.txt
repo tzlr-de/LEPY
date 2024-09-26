@@ -1,6 +1,6 @@
 matplotlib
 tqdm
-pyyaml
+pyyaml>=6.0
 munch
 
 scalebar~=0.5.2

@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from dataclasses import field
 
 from mothseg.output_definitions import Size
 from mothseg.output_definitions import Statistic
@@ -9,20 +10,20 @@ from mothseg.output_definitions import PointsOfInterest
 
 @dataclass
 class Outputs:
-    image: Size = Size(width="image_width", height="image_height")
-    intensity: Statistic = Statistic.new("intensity")
-    saturation: Statistic = Statistic.new("saturation")
-    hue: Statistic = Statistic.new("hue")
+    image: Size = field(default_factory=lambda: Size(width="image_width", height="image_height"))
+    intensity: Statistic = field(default_factory=lambda: Statistic.new("intensity"))
+    saturation: Statistic = field(default_factory=lambda: Statistic.new("saturation"))
+    hue: Statistic = field(default_factory=lambda: Statistic.new("hue"))
 
-    red: Statistic = Statistic.new("red")
-    green: Statistic = Statistic.new("green")
-    blue: Statistic = Statistic.new("blue")
-    uv: Statistic = Statistic.new("uv")
-    black: Statistic = Statistic.new("black")
+    red: Statistic = field(default_factory=lambda: Statistic.new("red"))
+    green: Statistic = field(default_factory=lambda: Statistic.new("green"))
+    blue: Statistic = field(default_factory=lambda: Statistic.new("blue"))
+    uv: Statistic = field(default_factory=lambda: Statistic.new("uv"))
+    black: Statistic = field(default_factory=lambda: Statistic.new("black"))
 
-    contour: Contour = Contour()
-    calibration: Calibration = Calibration()
-    poi: PointsOfInterest = PointsOfInterest()
+    contour: Contour = field(default_factory=lambda: Contour())
+    calibration: Calibration = field(default_factory=lambda: Calibration())
+    poi: PointsOfInterest = field(default_factory=lambda: PointsOfInterest())
 
     def key2name(self, key: str) -> str:
         return {

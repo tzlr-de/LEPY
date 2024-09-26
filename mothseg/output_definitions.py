@@ -81,17 +81,17 @@ class POIArea:
 class PointsOfInterest:
     orig_width: str = "poi_orig_width"
     orig_height: str = "poi_orig_height"
-    dist: POIDist = field(default=POIDist())
-    area: POIArea = field(default=POIArea())
-    center: Coord = field(default=Coord(x="poi_center_x", y="poi_center_y"))
-    body_top: Coord = field(default=Coord(x="poi_body_top_x", y="poi_body_top_y"))
-    body_bot: Coord = field(default=Coord(x="poi_body_bot_x", y="poi_body_bot_y"))
-    outer_l: Coord = field(default=Coord(x="poi_outer_l_x", y="poi_outer_l_y"))
-    outer_r: Coord = field(default=Coord(x="poi_outer_r_x", y="poi_outer_r_y"))
-    inner_top_l: Coord = field(default=Coord(x="poi_inner_top_l_x", y="poi_inner_top_l_y"))
-    inner_top_r: Coord = field(default=Coord(x="poi_inner_top_r_x", y="poi_inner_top_r_y"))
-    inner_bot_l: Coord = field(default=Coord(x="poi_inner_bot_l_x", y="poi_inner_bot_l_y"))
-    inner_bot_r: Coord = field(default=Coord(x="poi_inner_bot_r_x", y="poi_inner_bot_r_y"))
+    dist: POIDist = field(default_factory=POIDist)
+    area: POIArea = field(default_factory=POIArea)
+    center: Coord = field(default_factory=lambda: Coord(x="poi_center_x", y="poi_center_y"))
+    body_top: Coord = field(default_factory=lambda: Coord(x="poi_body_top_x", y="poi_body_top_y"))
+    body_bot: Coord = field(default_factory=lambda: Coord(x="poi_body_bot_x", y="poi_body_bot_y"))
+    outer_l: Coord = field(default_factory=lambda: Coord(x="poi_outer_l_x", y="poi_outer_l_y"))
+    outer_r: Coord = field(default_factory=lambda: Coord(x="poi_outer_r_x", y="poi_outer_r_y"))
+    inner_top_l: Coord = field(default_factory=lambda: Coord(x="poi_inner_top_l_x", y="poi_inner_top_l_y"))
+    inner_top_r: Coord = field(default_factory=lambda: Coord(x="poi_inner_top_r_x", y="poi_inner_top_r_y"))
+    inner_bot_l: Coord = field(default_factory=lambda: Coord(x="poi_inner_bot_l_x", y="poi_inner_bot_l_y"))
+    inner_bot_r: Coord = field(default_factory=lambda: Coord(x="poi_inner_bot_r_x", y="poi_inner_bot_r_y"))
 
 @dataclass
 class Contour:
@@ -109,4 +109,4 @@ class Contour:
 @dataclass
 class Calibration:
     length: str = "calibration_length"
-    pos: Box = field(default=Box(x="calibration_pos_x", y="calibration_pos_y", w="calibration_pos_w", h="calibration_pos_h"))
+    pos: Box = field(default_factory=lambda: Box(x="calibration_pos_x", y="calibration_pos_y", w="calibration_pos_w", h="calibration_pos_h"))
