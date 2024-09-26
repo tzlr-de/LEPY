@@ -35,12 +35,13 @@ def _plot_images(ims, titles, grid, *, row: int, mask=None, cmaps=None):
         _title_obj.set_color(title_color)
         ax.axis("off")
 
-def _plot_histograms(ax, col_stats, *, colors, titles, alpha=0.3):
-    for hist, col, title in zip(col_stats.histograms, colors, titles):
+def _plot_histograms(ax, histograms, bins, *, colors, titles, alpha=0.3):
+    assert len(colors) == len(titles) == len(histograms), "Invalid input sizes!"
+    for hist, col, title in zip(histograms, colors, titles):
         if hist is None:
             continue
-        ax.plot(col_stats.bins[:-1], hist, color=col, label=title)
-        ax.fill_between(col_stats.bins[:-1], hist, color=col, alpha=alpha)
+        ax.plot(bins, hist, color=col, label=title)
+        ax.fill_between(bins, hist, color=col, alpha=alpha)
 
     ax.set_xlim(-1, 256)
     ax.set_xticks(np.linspace(0, 256, 5))
@@ -71,8 +72,7 @@ def _plot_col_stats(ax, stats):
 
     rows = [[int(q25), int(median), int(q75), int(iqr)] for _, q25, q75, median, iqr in stats]
     tab  = ax.table(cellText=rows,
-                colLabels=[
-                    "Q25", "Median", "Q75", "IQR"],
+                colLabels=["Q25", "Median", "Q75", "IQR"],
                 colLoc="center",
                 cellLoc="center",
                 loc="center",
@@ -219,8 +219,10 @@ class Plotter(BaseWriter):
                      mask=mask)
 
         _plot_traits        (plt.subplot(grid[ :2, 5: ]), mask, image.contour, pois, image.stats)
-        _plot_histograms    (plt.subplot(grid[2:4,  :5]), col_stats, colors=colors, titles=titles)
-        _plot_boxplots      (plt.subplot(grid[4  ,  :5]), channels, colors=colors, mask=mask)
+        _plot_histograms    (plt.subplot(grid[2:4,  :5]), col_stats.histograms, col_stats.bins[:-1],
+                             colors=colors, titles=titles)
+        _plot_boxplots      (plt.subplot(grid[4  ,  :5]), channels,
+                             colors=colors, mask=mask)
         _plot_stats         (plt.subplot(grid[2:4, 5: ]), image.stats)
         _plot_col_stats     (plt.subplot(grid[4  , 5  ]), col_stats)
         _plot_scalebar      (plt.subplot(grid[4  , 6  ]), calib_result)

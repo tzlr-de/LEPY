@@ -172,16 +172,14 @@ class Image:
         bins = np.linspace(0, 255, 256//binsize, endpoint=True)
         def compute(channel, out_keys: Statistic):
             nonlocal histograms, q25s, q75s, iqrs, medians, binsize
-            # we want to show missing UV channel as 0 in the visualization table
-            medians.append(np.median(channel))
-            q25s.append(np.percentile(channel, 25))
-            q75s.append(np.percentile(channel, 75))
-            iqrs.append(q75s[-1] - q25s[-1])
+
+            if self.mask is not None:
+                channel = channel[self.mask != 0]
 
             # ... but we don't want to compute histogram for it
             # or store 0s in the output CSV table
             if (channel == 0).all():
-                histograms.append(None)
+                # histograms.append(None)
                 self.stats.update({
                     out_keys.median: -1,
                     out_keys.Q25: -1,
@@ -190,9 +188,13 @@ class Image:
                 })
 
             else:
-                hist, _ = np.histogram(channel,
-                                    bins=bins)
+                hist, _ = np.histogram(channel, bins=bins)
                 histograms.append(hist)
+
+                medians.append(np.median(channel))
+                q25s.append(np.percentile(channel, 25))
+                q75s.append(np.percentile(channel, 75))
+                iqrs.append(q75s[-1] - q25s[-1])
 
                 self.stats.update({
                     out_keys.median: medians[-1],
@@ -202,12 +204,9 @@ class Image:
                 })
 
         for channel, out_keys in zip(self.four_chan_im.transpose(2, 0, 1), [OUTS.red, OUTS.green, OUTS.blue, OUTS.uv]):
-            if self.mask is not None:
-                channel = channel[self.mask != 0]
-
             compute(channel, out_keys)
 
-        compute(self.intensity_im[self.mask != 0], OUTS.black)
+        compute(self.intensity_im, OUTS.black)
 
         return ColorStats(histograms=histograms,
                      q25s=q25s, q75s=q75s,
