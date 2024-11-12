@@ -24,15 +24,15 @@ class OutputWriter(BaseWriter):
                 "Code",
 
                 OUTPUTS.image.width, OUTPUTS.image.height,
-                OUTPUTS.intensity.median, OUTPUTS.intensity.mean, OUTPUTS.intensity.stddev,
-                OUTPUTS.saturation.median, OUTPUTS.saturation.mean, OUTPUTS.saturation.stddev,
-                OUTPUTS.hue.median, OUTPUTS.hue.mean, OUTPUTS.hue.stddev,
+                OUTPUTS.intensity.min, OUTPUTS.intensity.max, OUTPUTS.intensity.median, OUTPUTS.intensity.mean, OUTPUTS.intensity.stddev,
+                OUTPUTS.saturation.min, OUTPUTS.saturation.max, OUTPUTS.saturation.median, OUTPUTS.saturation.mean, OUTPUTS.saturation.stddev,
+                OUTPUTS.hue.min, OUTPUTS.hue.max, OUTPUTS.hue.median, OUTPUTS.hue.mean, OUTPUTS.hue.stddev,
 
-                OUTPUTS.red.median, OUTPUTS.red.Q25, OUTPUTS.red.Q75, OUTPUTS.red.IQR,
-                OUTPUTS.green.median, OUTPUTS.green.Q25, OUTPUTS.green.Q75, OUTPUTS.green.IQR,
-                OUTPUTS.blue.median, OUTPUTS.blue.Q25, OUTPUTS.blue.Q75, OUTPUTS.blue.IQR,
-                OUTPUTS.uv.median, OUTPUTS.uv.Q25, OUTPUTS.uv.Q75, OUTPUTS.uv.IQR,
-                OUTPUTS.black.median, OUTPUTS.black.Q25, OUTPUTS.black.Q75, OUTPUTS.black.IQR,
+                OUTPUTS.red.min, OUTPUTS.red.max, OUTPUTS.red.median, OUTPUTS.red.Q25, OUTPUTS.red.Q75, OUTPUTS.red.IQR,
+                OUTPUTS.green.min, OUTPUTS.green.max, OUTPUTS.green.median, OUTPUTS.green.Q25, OUTPUTS.green.Q75, OUTPUTS.green.IQR,
+                OUTPUTS.blue.min, OUTPUTS.blue.max, OUTPUTS.blue.median, OUTPUTS.blue.Q25, OUTPUTS.blue.Q75, OUTPUTS.blue.IQR,
+                OUTPUTS.uv.min, OUTPUTS.uv.max, OUTPUTS.uv.median, OUTPUTS.uv.Q25, OUTPUTS.uv.Q75, OUTPUTS.uv.IQR,
+                OUTPUTS.black.min, OUTPUTS.black.max, OUTPUTS.black.median, OUTPUTS.black.Q25, OUTPUTS.black.Q75, OUTPUTS.black.IQR,
 
                 OUTPUTS.contour.length, OUTPUTS.contour.area,
                 OUTPUTS.contour.xmin, OUTPUTS.contour.xmax,
