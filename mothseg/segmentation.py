@@ -52,6 +52,9 @@ def segment(im, *, method: str = "grabcut+otsu",
 
     bin_im = binarize(im, chan, method=method)
 
+    if fill_holes:
+        bin_im = sp.ndimage.binary_fill_holes(bin_im).astype(bin_im.dtype)
+
     contours, _ = cv2.findContours(bin_im, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     contours = sorted(contours, key=cv2.contourArea, reverse=True)
 
@@ -59,9 +62,9 @@ def segment(im, *, method: str = "grabcut+otsu",
 
     stats = {
 
-        **OUTS.hue.calc_stats(H),
-        **OUTS.saturation.calc_stats(S),
-        **OUTS.intensity.calc_stats(V),
+        **OUTS.hue.calc_stats(H, mask=bin_im),
+        **OUTS.saturation.calc_stats(S, mask=bin_im),
+        **OUTS.intensity.calc_stats(V, mask=bin_im),
 
         OUTS.image.width: int(width / rescale),
         OUTS.image.height: int(height / rescale),
@@ -76,9 +79,6 @@ def segment(im, *, method: str = "grabcut+otsu",
         OUTS.contour.ymax: int(np.amax( largest_contour[:, 0, 1] )),
 
     }
-
-    if fill_holes:
-        bin_im = sp.ndimage.binary_fill_holes(bin_im).astype(bin_im.dtype)
 
     if rescale is not None and 0 < rescale < 1.0:
         chan = utils.rescale(chan, 1 / rescale)
