@@ -9,6 +9,7 @@ def parse_args():
         Arg("--output", "-o"),
 
         Arg.flag("--yes", "-y"),
+        Arg.flag("--force", "-f"),
 
         Arg.flag("--plot_interm"),
         Arg.flag("--use_timestamp", "-use_ts"),

@@ -80,7 +80,9 @@ def check_output(args, *, use_timestamp: bool = True):
 
     if Path(folder).exists():
         logging.warning("Output folder already exists!")
-        if input("Do you want save outputs into an existing folder? [y/N] ").lower() != "y":
+        if args.force:
+            logging.warning("Overwriting existing files.")
+        elif input("Do you want save outputs into an existing folder? [y/N] ").lower() != "y":
             return None
 
     return folder
