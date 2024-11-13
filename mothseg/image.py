@@ -212,6 +212,8 @@ class Image:
                     out_keys.Q25: q25s[-1],
                     out_keys.Q75: q75s[-1],
                     out_keys.IQR: iqrs[-1],
+                    out_keys.min: float(channel.min()),
+                    out_keys.max: float(channel.max()),
                 })
 
         for channel, out_keys in zip(self.four_chan_im.transpose(2, 0, 1), [OUTS.red, OUTS.green, OUTS.blue, OUTS.uv]):
