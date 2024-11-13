@@ -87,6 +87,17 @@ class Image:
         res = cv2.addWeighted(gray_im*mask, 0.5, uv*mask, 0.5, 0)
         return res
 
+    @property
+    def gbuv_im(self) -> np.ndarray:
+        """ Transforms the RGB image to a GB-UV image. Requires the UV channel to be loaded. """
+        im, uv = self.rgb_im, self.uv_im
+        assert uv is not None, "UV channel is not loaded"
+        gb_uv_image = np.zeros_like(im)
+        gb_uv_image[:, :, 0] = im[:, :, 1] # R <- G
+        gb_uv_image[:, :, 1] = im[:, :, 2] # G <- B
+        gb_uv_image[:, :, 2] = uv          # B <- UV
+        return gb_uv_image
+
     def read(self, *, uv_channel_index: int = 0) -> None:
 
         if self.rgb_im is not None:

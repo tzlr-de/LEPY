@@ -25,6 +25,10 @@ def _plot_images(ims, titles, grid, *, row: int, mask=None, cmaps=None):
         ax = plt.subplot(grid[row, i])
         if chan.ndim == 2:
             ax.imshow(chan * mask, cmap="gray" if cmap is None else cmap)
+            if isinstance(mask, np.ndarray):
+                _mask = mask.astype(np.float32)
+                _mask[mask == 1] = np.nan
+                ax.imshow(_mask, cmap="gray")
         else:
             ax.imshow(chan * mask)
 
@@ -48,7 +52,7 @@ def _plot_histograms(ax, histograms, bins, *, colors, titles, alpha=0.3):
     ax.set_xticks(np.linspace(0, 256, 5*5), minor=True)
     ax.legend()
 
-def _plot_boxplots(ax, channels, *, colors, mask,
+def _plot_boxplots(ax, channels, *, colors, titles, mask,
                    median_color="yellow",
                    width=0.7,
                    showfliers=False,
@@ -57,7 +61,7 @@ def _plot_boxplots(ax, channels, *, colors, mask,
         ax.boxplot(chan[mask != 0], patch_artist=True,
                    vert=False,
                    widths=width,
-                   boxprops=dict(facecolor=col),
+                   boxprops=dict(facecolor="white" if col == "black" else col), # black is reserved for intensity
                    medianprops=dict(color=median_color),
                    positions=[len(channels) - i],
                    showfliers=showfliers)
@@ -65,7 +69,7 @@ def _plot_boxplots(ax, channels, *, colors, mask,
     ax.set_xlim(-1, 256)
     ax.set_xticks(np.linspace(0, 256, 5))
     ax.set_xticks(np.linspace(0, 256, 5*5), minor=True)
-    ax.set_yticklabels(colors)
+    ax.set_yticklabels(titles)
 
 def _plot_col_stats(ax, stats):
     ax.axis("off")
@@ -188,14 +192,14 @@ class Plotter(BaseWriter):
         fig = plt.figure(figsize=(16, 9))
         grid = plt.GridSpec(5, 7, figure=fig)
 
-        saturation = cv2.cvtColor(im, cv2.COLOR_RGB2HSV)[:, :, 1]
-        saturation -= saturation.min()
-        saturation = (saturation / saturation.max() * 255).astype(np.uint8)
 
         if image.has_uv:
-            images = [im, uv, gray, saturation, mask]
-            titles = ["RGB image", "UV image", "B/W image", "Saturation",  "Mask"]
+            images = [im, uv, gray, image.gbuv_im, mask]
+            titles = ["RGB image", "UV image", "B/W image", "GB-UV image",  "Mask"]
         else:
+            saturation = cv2.cvtColor(im, cv2.COLOR_RGB2HSV)[:, :, 1]
+            saturation -= saturation.min()
+            saturation = (saturation / saturation.max() * 255).astype(np.uint8)
             images = [im, gray, saturation, mask]
             titles = ["RGB image", "B/W image", "Saturation", "Mask"]
 
@@ -205,16 +209,17 @@ class Plotter(BaseWriter):
         if image.has_uv:
 
             channels = [R, G, B, uv, intensity_img]
-            colors = ["red", "green", "blue", "purple", "black"]
+            colors = ["red", "green", "blue", "purple", "gray"]
             titles = [ "Red channel", "Green channel", "Blue channel", "UV channel", "B/W + UV image"]
         else:
             channels = [R, G, B, intensity_img]
-            colors = ["red", "green", "blue", "black"]
+            colors = ["red", "green", "blue", "gray"]
             titles = ["Red channel", "Green channel", "Blue channel", "B/W image"]
 
         _plot_images(ims=channels,
                      titles=list(zip(titles, colors)),
                      grid=grid,
+                     cmaps=["Reds", "Greens", "Blues", "Purples", "gray"],
                      row=1,
                      mask=mask)
 
@@ -222,7 +227,7 @@ class Plotter(BaseWriter):
         _plot_histograms    (plt.subplot(grid[2:4,  :5]), col_stats.histograms, col_stats.bins[:-1],
                              colors=colors, titles=titles)
         _plot_boxplots      (plt.subplot(grid[4  ,  :5]), channels,
-                             colors=colors, mask=mask)
+                             colors=colors, titles=titles, mask=mask)
         _plot_stats         (plt.subplot(grid[2:4, 5: ]), image.stats)
         _plot_col_stats     (plt.subplot(grid[4  , 5  ]), col_stats)
         _plot_scalebar      (plt.subplot(grid[4  , 6  ]), calib_result)
@@ -246,3 +251,8 @@ class Plotter(BaseWriter):
         else:
             plt.show()
         plt.close()
+
+    def save_img(self, orig_path: str, img: np.ndarray, *, subfolder: str):
+        dest = self.new_path(orig_path, new_suffix=".jpg", subfolder=subfolder)
+        plt.imsave(dest, img)
+        return dest

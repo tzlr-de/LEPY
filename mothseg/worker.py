@@ -66,5 +66,7 @@ class Worker:
                               calib_result=calib_result,
                               col_stats=col_stats,
                             )
+            if image.has_uv:
+                self.plotter.save_img(image.rgb_path, image.gbuv_im, subfolder="gbuv")
 
         return image.stats
