@@ -1,11 +1,17 @@
 from dataclasses import dataclass
 from dataclasses import field
 
-from mothseg.output_definitions import Size
-from mothseg.output_definitions import Statistic
-from mothseg.output_definitions import Contour
-from mothseg.output_definitions import Calibration
-from mothseg.output_definitions import PointsOfInterest
+from mothseg.outputs.definitions import Size
+from mothseg.outputs.definitions import Statistic
+from mothseg.outputs.definitions import Contour
+from mothseg.outputs.definitions import Calibration
+from mothseg.outputs.definitions import PointsOfInterest
+from mothseg.outputs.definitions import Box
+from mothseg.outputs.definitions import Coord
+from mothseg.outputs.definitions import POIDist
+from mothseg.outputs.definitions import POIArea
+
+
 
 
 @dataclass
@@ -55,4 +61,15 @@ class Outputs:
 
 OUTPUTS = Outputs()
 
-__all__ = ["OUTPUTS"]
+__all__ = [
+    "OUTPUTS",
+    "Size",
+    "Statistic",
+    "Contour",
+    "Calibration",
+    "PointsOfInterest",
+    "Box",
+    "Coord",
+    "POIDist",
+    "POIArea",
+]

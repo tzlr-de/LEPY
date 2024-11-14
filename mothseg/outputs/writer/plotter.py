@@ -8,8 +8,8 @@ from mothseg import PointsOfInterest
 from mothseg import visualization as vis
 from mothseg.image import ColorStats
 from mothseg.image import Image
-from mothseg.output_writer.base import BaseWriter
 from mothseg.outputs import OUTPUTS as OUTS
+from mothseg.outputs.writer.base import BaseWriter
 
 
 def _plot_images(ims, titles, grid, *, row: int, mask=None, cmaps=None):
@@ -222,7 +222,7 @@ class Plotter(BaseWriter):
         _plot_images(ims=channels,
                      titles=list(zip(titles, colors)),
                      grid=grid,
-                     cmaps=["Reds", "Greens", "Blues", "Purples", "gray"],
+                    #  cmaps=["Reds", "Greens", "Blues", "Purples", "gray"],
                      row=1,
                      mask=mask)
 

@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import typing as T
 
-from mothseg.output_writer import Plotter
+from mothseg.outputs.writer import Plotter
 from mothseg.image import Image
 
 class Worker:

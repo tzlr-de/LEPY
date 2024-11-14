@@ -10,7 +10,7 @@ from matplotlib.pyplot import imread
 import scalebar
 from mothseg.poi import PointsOfInterest
 from mothseg.outputs import OUTPUTS as OUTS
-from mothseg.output_definitions import Statistic
+from mothseg.outputs import Statistic
 
 
 @dataclass

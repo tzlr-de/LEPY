@@ -6,7 +6,7 @@ import datetime as dt
 from pathlib import Path
 
 from mothseg.outputs import OUTPUTS
-from mothseg.output_writer.base import BaseWriter
+from mothseg.outputs.writer.base import BaseWriter
 
 class OutputWriter(BaseWriter):
 
