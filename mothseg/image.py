@@ -20,14 +20,16 @@ class ColorStats:
     q75s: T.List[float]
     medians: T.List[float]
     iqrs: T.List[float]
+    shannon_indices: T.List[float]
+    simpson_indices: T.List[float]
 
     bins: np.ndarray
 
     def __iter__(self):
-        return zip(self.histograms, self.q25s, self.q75s, self.medians, self.iqrs)
+        return zip(self.histograms, self.q25s, self.q75s, self.medians, self.iqrs, self.shannon_indices, self.simpson_indices)
 
     def __getitem__(self, idx):
-        return self.histograms[idx], self.q25s[idx], self.q75s[idx], self.medians[idx], self.iqrs[idx]
+        return self.histograms[idx], self.q25s[idx], self.q75s[idx], self.medians[idx], self.iqrs[idx], self.shannon_indices[idx], self.simpson_indices[idx]
 
     def __len__(self):
         return len(self.histograms)
@@ -179,6 +181,7 @@ class Image:
 
     def color_stats(self, *, binsize: int = 1) -> ColorStats:
         histograms, q25s, q75s, iqrs, medians = [], [], [], [], []
+        shannon_indices, simpson_indices = [], []
 
         bins = np.linspace(0, 255, 256//binsize, endpoint=True)
         def compute(channel, out_keys: Statistic):
@@ -206,6 +209,8 @@ class Image:
                 q25s.append(np.percentile(channel, 25))
                 q75s.append(np.percentile(channel, 75))
                 iqrs.append(q75s[-1] - q25s[-1])
+                shannon_indices.append(shannon_index(channel))
+                simpson_indices.append(simpson_index(channel))
 
                 self.stats.update({
                     out_keys.median: medians[-1],
@@ -214,6 +219,8 @@ class Image:
                     out_keys.IQR: iqrs[-1],
                     out_keys.min: float(channel.min()),
                     out_keys.max: float(channel.max()),
+                    out_keys.shannon: shannon_indices[-1],
+                    out_keys.simpson: simpson_indices[-1],
                 })
 
         for channel, out_keys in zip(self.four_chan_im.transpose(2, 0, 1), [OUTS.red, OUTS.green, OUTS.blue, OUTS.uv]):
@@ -224,4 +231,23 @@ class Image:
         return ColorStats(histograms=histograms,
                      q25s=q25s, q75s=q75s,
                      medians=medians,
-                     iqrs=iqrs, bins=bins)
+                     iqrs=iqrs, bins=bins,
+                     shannon_indices=shannon_indices,
+                     simpson_indices=simpson_indices)
+
+def _channel_distribution(data: np.ndarray, bins: int = 256) -> np.ndarray:
+    """ Computes the distribution of the data in the bins. """
+    hist, _ = np.histogram(data, bins=bins, range=(0, 255))
+    return hist / hist.sum()
+
+def shannon_index(data: np.ndarray, *, bins: int = 256) -> float:
+    """ Computes Shannon entropy of the data. """
+    p = _channel_distribution(data, bins=bins)
+    max_diversity = np.log(bins)
+    p = p[p != 0]
+    return -np.sum(p * np.log(p) / max_diversity)
+
+def simpson_index(data: np.ndarray, *, bins: int = 256) -> float:
+    """ Computes Simpson index of the data. """
+    p = _channel_distribution(data, bins=bins)
+    return 1 - np.sum(p ** 2)

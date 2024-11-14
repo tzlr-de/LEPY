@@ -33,6 +33,9 @@ class Statistic:
     Q75: str
     IQR: str
 
+    shannon: str
+    simpson: str
+
     @classmethod
     def new(cls, name):
         return cls(
@@ -45,6 +48,8 @@ class Statistic:
             Q25=f"{name}_Q25",
             Q75=f"{name}_Q75",
             IQR=f"{name}_IQR",
+            shannon=f"{name}_shannon",
+            simpson=f"{name}_simpson",
         )
 
     def calc_stats(self, arr, *, mask = None) -> dict:

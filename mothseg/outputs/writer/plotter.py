@@ -74,9 +74,9 @@ def _plot_boxplots(ax, channels, *, colors, titles, mask,
 def _plot_col_stats(ax, stats):
     ax.axis("off")
 
-    rows = [[int(q25), int(median), int(q75), int(iqr)] for _, q25, q75, median, iqr in stats]
+    rows = [[int(q25), int(median), int(q75), int(iqr), f"{shannon:.2f}", f"{simpson:.2f}"] for _, q25, q75, median, iqr, shannon, simpson in stats]
     tab  = ax.table(cellText=rows,
-                colLabels=["Q25", "Median", "Q75", "IQR"],
+                colLabels=["Q25", "Median", "Q75", "IQR", "Shannon Idx", "Simpson Idx"],
                 colLoc="center",
                 cellLoc="center",
                 loc="center",
@@ -207,7 +207,7 @@ class Plotter(BaseWriter):
         intensity_img = image.intensity_im
 
         fig = plt.figure(figsize=(16, 9))
-        grid = plt.GridSpec(5, 7, figure=fig)
+        grid = plt.GridSpec(5, 8, figure=fig)
 
 
         if image.has_uv:
@@ -241,19 +241,20 @@ class Plotter(BaseWriter):
                      row=1,
                      mask=mask)
 
-        _plot_traits        (plt.subplot(grid[ :2, 5: ]),
+        _plot_traits        (plt.subplot(grid[ :2, 5:7 ]),
                              mask, image.contour, pois, image.stats)
+        _plot_scalebar      (plt.subplot(grid[ :2, 7  ]),
+                             calib_result)
         _plot_histograms    (plt.subplot(grid[2:4,  :5]),
                              col_stats.histograms, col_stats.bins[:-1],
                              colors=colors, titles=titles)
-        _plot_boxplots      (plt.subplot(grid[4  ,  :5]),
-                             channels, colors=colors, titles=titles, mask=mask)
         _plot_stats         (plt.subplot(grid[2:4, 5: ]),
                              image.stats)
-        _plot_col_stats     (plt.subplot(grid[4  , 5  ]),
+
+        _plot_boxplots      (plt.subplot(grid[4  ,  :5]),
+                             channels, colors=colors, titles=titles, mask=mask)
+        _plot_col_stats     (plt.subplot(grid[4  , 5: ]),
                              col_stats)
-        _plot_scalebar      (plt.subplot(grid[4  , 6  ]),
-                             calib_result)
 
         plt.tight_layout()
 

@@ -29,11 +29,11 @@ class OutputWriter(BaseWriter):
                 OUTPUTS.saturation.min, OUTPUTS.saturation.max, OUTPUTS.saturation.median, OUTPUTS.saturation.mean, OUTPUTS.saturation.stddev,
                 OUTPUTS.hue.min, OUTPUTS.hue.max, OUTPUTS.hue.median, OUTPUTS.hue.mean, OUTPUTS.hue.stddev,
 
-                OUTPUTS.red.min, OUTPUTS.red.max, OUTPUTS.red.median, OUTPUTS.red.Q25, OUTPUTS.red.Q75, OUTPUTS.red.IQR,
-                OUTPUTS.green.min, OUTPUTS.green.max, OUTPUTS.green.median, OUTPUTS.green.Q25, OUTPUTS.green.Q75, OUTPUTS.green.IQR,
-                OUTPUTS.blue.min, OUTPUTS.blue.max, OUTPUTS.blue.median, OUTPUTS.blue.Q25, OUTPUTS.blue.Q75, OUTPUTS.blue.IQR,
-                OUTPUTS.uv.min, OUTPUTS.uv.max, OUTPUTS.uv.median, OUTPUTS.uv.Q25, OUTPUTS.uv.Q75, OUTPUTS.uv.IQR,
-                OUTPUTS.black.min, OUTPUTS.black.max, OUTPUTS.black.median, OUTPUTS.black.Q25, OUTPUTS.black.Q75, OUTPUTS.black.IQR,
+                OUTPUTS.red.min, OUTPUTS.red.max, OUTPUTS.red.median, OUTPUTS.red.Q25, OUTPUTS.red.Q75, OUTPUTS.red.IQR, OUTPUTS.red.shannon, OUTPUTS.red.simpson,
+                OUTPUTS.green.min, OUTPUTS.green.max, OUTPUTS.green.median, OUTPUTS.green.Q25, OUTPUTS.green.Q75, OUTPUTS.green.IQR, OUTPUTS.green.shannon, OUTPUTS.green.simpson,
+                OUTPUTS.blue.min, OUTPUTS.blue.max, OUTPUTS.blue.median, OUTPUTS.blue.Q25, OUTPUTS.blue.Q75, OUTPUTS.blue.IQR, OUTPUTS.blue.shannon, OUTPUTS.blue.simpson,
+                OUTPUTS.uv.min, OUTPUTS.uv.max, OUTPUTS.uv.median, OUTPUTS.uv.Q25, OUTPUTS.uv.Q75, OUTPUTS.uv.IQR, OUTPUTS.uv.shannon, OUTPUTS.uv.simpson,
+                OUTPUTS.black.min, OUTPUTS.black.max, OUTPUTS.black.median, OUTPUTS.black.Q25, OUTPUTS.black.Q75, OUTPUTS.black.IQR, OUTPUTS.black.shannon, OUTPUTS.black.simpson,
 
                 OUTPUTS.contour.length, OUTPUTS.contour.area,
                 OUTPUTS.contour.xmin, OUTPUTS.contour.xmax,
