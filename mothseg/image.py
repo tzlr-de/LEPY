@@ -100,6 +100,28 @@ class Image:
         gb_uv_image[:, :, 2] = uv          # B <- UV
         return gb_uv_image
 
+    @property
+    def luminance(self) -> np.ndarray:
+        """ Returns the luminance of the image. """
+        R, G, B = self.rgb_im.transpose(2, 0, 1)
+        return 0.2126 * R + 0.7152 * G + 0.0722 * B
+
+    @property
+    def chromaticity(self) -> T.Tuple[np.ndarray, np.ndarray, np.ndarray, T.Optional[np.ndarray]]:
+        """ Returns the chromaticity of the image. """
+        R, G, B = self.rgb_im.transpose(2, 0, 1).astype(np.float32)
+        if self.has_uv:
+            UV = self.uv_im.astype(np.float32)
+            total = R + G + B + UV
+            total[total == 0] = 1
+            result = R / total, G / total, B / total, UV / total
+        else:
+            total = R + G + B
+            total[total == 0] = 1
+            result = R / total, G / total, B / total, None
+
+        return result
+
     def read(self, *, uv_channel_index: int = 0) -> None:
 
         if self.rgb_im is not None:
@@ -227,6 +249,21 @@ class Image:
             compute(channel, out_keys)
 
         compute(self.intensity_im, OUTS.black)
+
+        r, g, b, uv = self.chromaticity
+        self.stats.update({
+            **OUTS.luminance.calc_stats(self.luminance, mask=self.mask),
+            **OUTS.chromaticity_red.calc_stats(r, mask=self.mask),
+            **OUTS.chromaticity_green.calc_stats(g, mask=self.mask),
+            **OUTS.chromaticity_blue.calc_stats(b, mask=self.mask),
+        })
+
+        if self.has_uv:
+            assert uv is not None, "UV channel is not loaded"
+            self.stats.update({
+                **OUTS.chromaticity_uv.calc_stats(uv, mask=self.mask),
+            })
+
 
         return ColorStats(histograms=histograms,
                      q25s=q25s, q75s=q75s,

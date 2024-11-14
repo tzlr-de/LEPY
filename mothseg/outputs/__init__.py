@@ -12,24 +12,31 @@ from mothseg.outputs.definitions import POIDist
 from mothseg.outputs.definitions import POIArea
 
 
-
+def _default(factory):
+    return field(default_factory=factory)
 
 @dataclass
 class Outputs:
-    image: Size = field(default_factory=lambda: Size(width="image_width", height="image_height"))
-    intensity: Statistic = field(default_factory=lambda: Statistic.new("intensity"))
-    saturation: Statistic = field(default_factory=lambda: Statistic.new("saturation"))
-    hue: Statistic = field(default_factory=lambda: Statistic.new("hue"))
+    image: Size = _default(lambda: Size(width="image_width", height="image_height"))
+    intensity: Statistic = _default(lambda: Statistic.new("intensity"))
+    saturation: Statistic = _default(lambda: Statistic.new("saturation"))
+    hue: Statistic = _default(lambda: Statistic.new("hue"))
 
-    red: Statistic = field(default_factory=lambda: Statistic.new("red"))
-    green: Statistic = field(default_factory=lambda: Statistic.new("green"))
-    blue: Statistic = field(default_factory=lambda: Statistic.new("blue"))
-    uv: Statistic = field(default_factory=lambda: Statistic.new("uv"))
-    black: Statistic = field(default_factory=lambda: Statistic.new("black"))
+    luminance: Statistic = _default(lambda: Statistic.new("luminance"))
+    chromaticity_red: Statistic = _default(lambda: Statistic.new("chrom_red"))
+    chromaticity_green: Statistic = _default(lambda: Statistic.new("chrom_green"))
+    chromaticity_blue: Statistic = _default(lambda: Statistic.new("chrom_blue"))
+    chromaticity_uv: Statistic = _default(lambda: Statistic.new("chrom_uv"))
 
-    contour: Contour = field(default_factory=lambda: Contour())
-    calibration: Calibration = field(default_factory=lambda: Calibration())
-    poi: PointsOfInterest = field(default_factory=lambda: PointsOfInterest())
+    red: Statistic = _default(lambda: Statistic.new("red"))
+    green: Statistic = _default(lambda: Statistic.new("green"))
+    blue: Statistic = _default(lambda: Statistic.new("blue"))
+    uv: Statistic = _default(lambda: Statistic.new("uv"))
+    black: Statistic = _default(lambda: Statistic.new("black"))
+
+    contour: Contour = _default(lambda: Contour())
+    calibration: Calibration = _default(lambda: Calibration())
+    poi: PointsOfInterest = _default(lambda: PointsOfInterest())
 
     def key2name(self, key: str) -> str:
         return {

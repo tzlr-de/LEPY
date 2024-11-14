@@ -35,6 +35,12 @@ class OutputWriter(BaseWriter):
                 OUTPUTS.uv.min, OUTPUTS.uv.max, OUTPUTS.uv.median, OUTPUTS.uv.Q25, OUTPUTS.uv.Q75, OUTPUTS.uv.IQR, OUTPUTS.uv.shannon, OUTPUTS.uv.simpson,
                 OUTPUTS.black.min, OUTPUTS.black.max, OUTPUTS.black.median, OUTPUTS.black.Q25, OUTPUTS.black.Q75, OUTPUTS.black.IQR, OUTPUTS.black.shannon, OUTPUTS.black.simpson,
 
+                OUTPUTS.luminance.min, OUTPUTS.luminance.max, OUTPUTS.luminance.median, OUTPUTS.luminance.mean, OUTPUTS.luminance.stddev,
+                OUTPUTS.chromaticity_red.min, OUTPUTS.chromaticity_red.max, OUTPUTS.chromaticity_red.median, OUTPUTS.chromaticity_red.mean, OUTPUTS.chromaticity_red.stddev,
+                OUTPUTS.chromaticity_green.min, OUTPUTS.chromaticity_green.max, OUTPUTS.chromaticity_green.median, OUTPUTS.chromaticity_green.mean, OUTPUTS.chromaticity_green.stddev,
+                OUTPUTS.chromaticity_blue.min, OUTPUTS.chromaticity_blue.max, OUTPUTS.chromaticity_blue.median, OUTPUTS.chromaticity_blue.mean, OUTPUTS.chromaticity_blue.stddev,
+                OUTPUTS.chromaticity_uv.min, OUTPUTS.chromaticity_uv.max, OUTPUTS.chromaticity_uv.median, OUTPUTS.chromaticity_uv.mean, OUTPUTS.chromaticity_uv.stddev,
+
                 OUTPUTS.contour.length, OUTPUTS.contour.area,
                 OUTPUTS.contour.xmin, OUTPUTS.contour.xmax,
                 OUTPUTS.contour.ymin, OUTPUTS.contour.ymax,
