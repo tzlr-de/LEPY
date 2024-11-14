@@ -4,6 +4,7 @@ import re
 import munch
 import logging
 import datetime as dt
+import typing as T
 
 from pathlib import Path
 from skimage import transform as tr
@@ -67,22 +68,23 @@ def read_config(path) -> munch.Munch:
     with open(path) as f:
         return munch.munchify(yaml.safe_load(f))
 
-def check_output(args, *, use_timestamp: bool = True):
-    folder = args.output
-    if folder is None:
+def check_output(output: T.Optional[str], src: Path, *,
+                 use_timestamp: bool = True,
+                 force: bool = False) -> T.Optional[str]:
+    if output is None:
         if use_timestamp:
-            folder = Path.cwd() / f"output/{dt.datetime.now():%Y-%m-%d_%H-%M-%S.%f}"
+            output = Path.cwd() / f"output/{dt.datetime.now():%Y-%m-%d_%H-%M-%S.%f}"
         else:
-            src = Path(args.folder)
-            folder = src.parent / f"{src.name}_result"
+            src = Path(src)
+            output = src.parent / f"{src.name}_result"
 
-    logging.info(f"Outputs will be stored to {folder}.")
+    logging.info(f"Outputs will be stored to {output}.")
 
-    if Path(folder).exists():
+    if Path(output).exists():
         logging.warning("Output folder already exists!")
-        if args.force:
+        if force:
             logging.warning("Overwriting existing files.")
         elif input("Do you want save outputs into an existing folder? [y/N] ").lower() != "y":
             return None
 
-    return folder
+    return output

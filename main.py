@@ -31,7 +31,10 @@ def main(args):
         logging.info("Execution aborted by the user!")
         return -1
 
-    output = utils.check_output(args, use_timestamp=args.use_timestamp)
+    output = utils.check_output(args.output, src=args.folder,
+                                use_timestamp=args.use_timestamp,
+                                force=args.force
+                                )
 
     if output is None:
         logging.info("No output folder selected, exiting script.")
