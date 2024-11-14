@@ -14,7 +14,7 @@ def parse_args():
         Arg.flag("--plot_interm"),
         Arg.flag("--use_timestamp", "-use_ts"),
 
-        Arg.flag("--raise_on_error"),
+        Arg.flag("--raise_on_error", "-raise"),
 
         Arg.int("--n_jobs", "-j", default=1),
     ])

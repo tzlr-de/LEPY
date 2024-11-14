@@ -87,7 +87,7 @@ def _plot_col_stats(ax, stats):
     tab.set_fontsize(10)
     tab.scale(1, 1.5)
 
-def _plot_stats(ax, stats):
+def _plot_stats(ax: plt.Axes, stats):
     ax.axis("off")
     rows = []
     for key in [OUTS.poi.dist.inner_outer_l, OUTS.poi.dist.inner_outer_r,
@@ -96,7 +96,7 @@ def _plot_stats(ax, stats):
                 OUTS.poi.area.wing_l, OUTS.poi.area.wing_r, OUTS.poi.area.body]:
         value = stats.get(key, None)
         unit = "mm²" if "area" in key else "mm"
-        rows.append([OUTS.key2name(key), f"{value:.2f} {unit}"])
+        rows.append([OUTS.key2name(key), f"{value:.2f}", unit])
 
     tab  = ax.table(cellText=rows,
                 colLoc="center",
@@ -105,6 +105,8 @@ def _plot_stats(ax, stats):
                 edges="horizontal",
                 fontsize=72,
                 )
+    for i in range(len(rows)):
+        tab[i, 1].set_text_props(ha="right")
     tab.auto_set_font_size(False)
     tab.set_fontsize(10)
     tab.scale(1, 1.5)
@@ -200,6 +202,7 @@ class Plotter(BaseWriter):
             saturation = cv2.cvtColor(im, cv2.COLOR_RGB2HSV)[:, :, 1]
             saturation -= saturation.min()
             saturation = (saturation / saturation.max() * 255).astype(np.uint8)
+
             images = [im, gray, saturation, mask]
             titles = ["RGB image", "B/W image", "Saturation", "Mask"]
 
@@ -223,14 +226,19 @@ class Plotter(BaseWriter):
                      row=1,
                      mask=mask)
 
-        _plot_traits        (plt.subplot(grid[ :2, 5: ]), mask, image.contour, pois, image.stats)
-        _plot_histograms    (plt.subplot(grid[2:4,  :5]), col_stats.histograms, col_stats.bins[:-1],
+        _plot_traits        (plt.subplot(grid[ :2, 5: ]),
+                             mask, image.contour, pois, image.stats)
+        _plot_histograms    (plt.subplot(grid[2:4,  :5]),
+                             col_stats.histograms, col_stats.bins[:-1],
                              colors=colors, titles=titles)
-        _plot_boxplots      (plt.subplot(grid[4  ,  :5]), channels,
-                             colors=colors, titles=titles, mask=mask)
-        _plot_stats         (plt.subplot(grid[2:4, 5: ]), image.stats)
-        _plot_col_stats     (plt.subplot(grid[4  , 5  ]), col_stats)
-        _plot_scalebar      (plt.subplot(grid[4  , 6  ]), calib_result)
+        _plot_boxplots      (plt.subplot(grid[4  ,  :5]),
+                             channels, colors=colors, titles=titles, mask=mask)
+        _plot_stats         (plt.subplot(grid[2:4, 5: ]),
+                             image.stats)
+        _plot_col_stats     (plt.subplot(grid[4  , 5  ]),
+                             col_stats)
+        _plot_scalebar      (plt.subplot(grid[4  , 6  ]),
+                             calib_result)
 
         plt.tight_layout()
 
