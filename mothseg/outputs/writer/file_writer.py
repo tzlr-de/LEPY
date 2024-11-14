@@ -12,7 +12,8 @@ class OutputWriter(BaseWriter):
 
     def __init__(self, folder: str, *, store_to_csv: bool = True, config = None) -> None:
         super().__init__(folder)
-        shutil.copy(config, self.root / Path(config).name)
+        if config is not None:
+            shutil.copy(config, self.root / Path(config).name)
 
         self._csv_file = None
         if store_to_csv:

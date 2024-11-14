@@ -173,9 +173,24 @@ def _plot_scalebar(ax, calib_result):
 
 class Plotter(BaseWriter):
 
-    def __init__(self, folder: str, *, plot_interm: bool) -> None:
+    def __init__(self, folder: str, *, plot_interm: bool, save_contours: bool = True) -> None:
         super().__init__(folder)
         self._plot_interm = plot_interm
+        self._save_contours = save_contours
+
+    def save_contour(self, image: Image, *, subfolder: str):
+        """ stores relative contour coordinates to a file """
+        if not self._save_contours:
+            return
+
+        path = self.new_path(image.rgb_path, ".txt", subfolder=subfolder)
+        with open(path, "w") as f:
+            f.write("0 ") # class index; we have only one class yet
+            h, w = image.rgb_im.shape[:2]
+            coords = []
+            for x, y in image.contour:
+                coords.append(f"{x / w:.7f} {y / h:.7f}")
+            f.write(" ".join(coords))
 
     def plot(self, image: Image, *,
              pois: PointsOfInterest,
@@ -184,9 +199,9 @@ class Plotter(BaseWriter):
              ) -> None:
 
         dest = self.new_path(image.rgb_path, ".png", subfolder="visualizations")
-
-
         im, uv, mask = image.rgb_im, image.uv_im, image.mask
+
+        self.save_contour(image, subfolder="contours")
 
         gray = image.gray_im
         intensity_img = image.intensity_im
