@@ -5,11 +5,12 @@ import scipy as sp
 
 from mothseg import utils
 from mothseg.binarization import binarize
+from mothseg.outputs import OUTPUTS as OUTS
 
 
 def segment(im, *, method: str = "grabcut+otsu",
             rescale: T.Optional[float] = None,
-            channel: str = "saturation",
+            channel: T.Union[str, np.ndarray] = "saturation",
             ksize: T.Optional[int] = None,
             fill_holes: bool = True):
 
@@ -22,14 +23,26 @@ def segment(im, *, method: str = "grabcut+otsu",
     height, width, *_ = hsv_im.shape
     H, S, V = hsv_im.transpose(2, 0, 1)
 
-    chan = {
-        "hue": H,
-        "saturation": S,
-        "intensity": V,
-        "value": V,
-        "gray": V,
-        "grey": V,
-    }.get(channel)
+    if isinstance(channel, str):
+        channel = channel.lower()
+
+        chan = {
+            "hue": H,
+            "saturation": S,
+            "intensity": V,
+            "value": V,
+            "gray": V,
+            "grey": V,
+        }.get(channel)
+    elif isinstance(channel, np.ndarray):
+
+        if rescale is not None and 0 < rescale < 1.0:
+            channel = utils.rescale(channel, rescale)
+        assert channel.shape[:2] == im.shape[:2], \
+            f"Channel shape {channel.shape[:2]} does not match image shape {im.shape[:2]}"
+        chan = channel
+    else:
+        raise ValueError(f"Invalid channel type: {type(channel)}")
 
     assert chan is not None, \
         f"Could not select desired channel: {channel}"
@@ -39,6 +52,9 @@ def segment(im, *, method: str = "grabcut+otsu",
 
     bin_im = binarize(im, chan, method=method)
 
+    if fill_holes:
+        bin_im = sp.ndimage.binary_fill_holes(bin_im).astype(bin_im.dtype)
+
     contours, _ = cv2.findContours(bin_im, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     contours = sorted(contours, key=cv2.contourArea, reverse=True)
 
@@ -46,34 +62,23 @@ def segment(im, *, method: str = "grabcut+otsu",
 
     stats = {
 
-        'median-intensity': float(np.median(V)),
-        'mean-intensity': float(np.mean(V)),
-        'stddev-intensity': float(np.std(V)),
-        'median-saturation': float(np.median(S)),
-        'mean-saturation': float(np.mean(S)),
-        'stddev-saturation': float(np.std(S)),
-        'median-hue': float(np.median(H)),
-        'mean-hue': float(np.mean(H)),
-        'stddev-hue': float(np.std(H)),
-        'image-width': int(width / rescale),
-        'image-height': int(height / rescale),
-        # these two do not make sense to me
-        # 'seg-absolute-size': len(V),
-        # 'seg-relative-size': len(V) / float( hsv_im.shape[0] * hsv_im.shape[1] ),
+        **OUTS.hue.calc_stats(H, mask=bin_im),
+        **OUTS.saturation.calc_stats(S, mask=bin_im),
+        **OUTS.intensity.calc_stats(V, mask=bin_im),
 
-        'contour-length': len(largest_contour),
-        'contour-area': cv2.contourArea(largest_contour),
+        OUTS.image.width: int(width / rescale),
+        OUTS.image.height: int(height / rescale),
+
+        OUTS.contour.length: len(largest_contour),
+        OUTS.contour.area: cv2.contourArea(largest_contour),
 
         # compute bounding box
-        'contour-xmin': int(np.amin( largest_contour[:, 0, 0] )),
-        'contour-xmax': int(np.amax( largest_contour[:, 0, 0] )),
-        'contour-ymin': int(np.amin( largest_contour[:, 0, 1] )),
-        'contour-ymax': int(np.amax( largest_contour[:, 0, 1] )),
+        OUTS.contour.xmin: int(np.amin( largest_contour[:, 0, 0] )),
+        OUTS.contour.xmax: int(np.amax( largest_contour[:, 0, 0] )),
+        OUTS.contour.ymin: int(np.amin( largest_contour[:, 0, 1] )),
+        OUTS.contour.ymax: int(np.amax( largest_contour[:, 0, 1] )),
 
     }
-
-    if fill_holes:
-        bin_im = sp.ndimage.binary_fill_holes(bin_im).astype(bin_im.dtype)
 
     if rescale is not None and 0 < rescale < 1.0:
         chan = utils.rescale(chan, 1 / rescale)

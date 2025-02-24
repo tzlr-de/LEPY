@@ -6,6 +6,8 @@ import scipy as sp
 from skimage import measure
 from dataclasses import dataclass
 
+from mothseg.outputs import OUTPUTS as OUTS
+
 @dataclass
 class Point:
     row: int
@@ -60,6 +62,7 @@ class PointsOfInterest:
     inner_bot_r: Point
 
     def __iter__(self):
+        """ used mainly for visualization """
         # yield "center", self.center
         yield "body_top", self.body_top
         yield "body_bot", self.body_bot
@@ -73,35 +76,35 @@ class PointsOfInterest:
     @property
     def stats(self):
         return {
-            "poi-orig_width": int(self.width),
-            "poi-orig_height": int(self.height),
+            OUTS.poi.orig_width: int(self.width),
+            OUTS.poi.orig_height: int(self.height),
 
-            "poi-center-x": int(self.center.col),
-            "poi-center-y": int(self.center.row),
+            OUTS.poi.center.x: int(self.center.col),
+            OUTS.poi.center.y: int(self.center.row),
 
-            "poi-body_top-x": int(self.body_top.col),
-            "poi-body_top-y": int(self.body_top.row),
+            OUTS.poi.body_top.x: int(self.body_top.col),
+            OUTS.poi.body_top.y: int(self.body_top.row),
 
-            "poi-body_bot-x": int(self.body_bot.col),
-            "poi-body_bot-y": int(self.body_bot.row),
+            OUTS.poi.body_bot.x: int(self.body_bot.col),
+            OUTS.poi.body_bot.y: int(self.body_bot.row),
 
-            "poi-outer_l-x": int(self.outer_l.col),
-            "poi-outer_l-y": int(self.outer_l.row),
+            OUTS.poi.outer_l.x: int(self.outer_l.col),
+            OUTS.poi.outer_l.y: int(self.outer_l.row),
 
-            "poi-outer_r-x": int(self.outer_r.col),
-            "poi-outer_r-y": int(self.outer_r.row),
+            OUTS.poi.outer_r.x: int(self.outer_r.col),
+            OUTS.poi.outer_r.y: int(self.outer_r.row),
 
-            "poi-inner_top_l-x": int(self.inner_top_l.col),
-            "poi-inner_top_l-y": int(self.inner_top_l.row),
+            OUTS.poi.inner_top_l.x: int(self.inner_top_l.col),
+            OUTS.poi.inner_top_l.y: int(self.inner_top_l.row),
 
-            "poi-inner_top_r-x": int(self.inner_top_r.col),
-            "poi-inner_top_r-y": int(self.inner_top_r.row),
+            OUTS.poi.inner_top_r.x: int(self.inner_top_r.col),
+            OUTS.poi.inner_top_r.y: int(self.inner_top_r.row),
 
-            "poi-inner_bot_l-x": int(self.inner_bot_l.col),
-            "poi-inner_bot_l-y": int(self.inner_bot_l.row),
+            OUTS.poi.inner_bot_l.x: int(self.inner_bot_l.col),
+            OUTS.poi.inner_bot_l.y: int(self.inner_bot_l.row),
 
-            "poi-inner_bot_r-x": int(self.inner_bot_r.col),
-            "poi-inner_bot_r-y": int(self.inner_bot_r.row),
+            OUTS.poi.inner_bot_r.x: int(self.inner_bot_r.col),
+            OUTS.poi.inner_bot_r.y: int(self.inner_bot_r.row),
 
         }
 
@@ -145,18 +148,18 @@ class PointsOfInterest:
         right_wing[right_wing == 1] = 3
 
         return [
-            ("poi-area-body", res, 1),
-            ("poi-area-wing_l", res, 2),
-            ("poi-area-wing_r", res, 3),
+            (OUTS.poi.area.body, res, 1),
+            (OUTS.poi.area.wing_l, res, 2),
+            (OUTS.poi.area.wing_r, res, 3),
         ]
 
     @property
     def named_distances(self):
         return [
-            ("poi-dist-inner", self.inner_top_l, self.inner_top_r),
-            ("poi-dist-body", self.body_top, self.body_bot),
-            ("poi-dist-inner-outer_l", self.inner_top_l, self.outer_l),
-            ("poi-dist-inner-outer_r", self.inner_top_r, self.outer_r),
+            (OUTS.poi.dist.inner, self.inner_top_l, self.inner_top_r),
+            (OUTS.poi.dist.body, self.body_top, self.body_bot),
+            (OUTS.poi.dist.inner_outer_l, self.inner_top_l, self.outer_l),
+            (OUTS.poi.dist.inner_outer_r, self.inner_top_r, self.outer_r),
         ]
 
     @classmethod

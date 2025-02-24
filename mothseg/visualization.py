@@ -1,53 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import typing as T
 import scalebar
-
-from mothseg import PointsOfInterest
-
-def plot(ims, contour, stats, pois: T.Optional[PointsOfInterest] = None):
-
-    fig, axs = plt.subplots(nrows=1, ncols=len(ims), figsize=(16,9), squeeze=False)
-
-    for _, _im in enumerate(ims):
-        ax = axs[np.unravel_index(_, axs.shape)]
-
-        ax.imshow(_im)
-        ax.plot(contour[:, 0], contour[:, 1], linewidth=2, alpha=0.6)
-        x0, y0, x1, y1 = stats['contour-xmin'], stats['contour-ymin'], stats['contour-xmax'], stats['contour-ymax']
-
-        ax.add_patch(plt.Rectangle((x0, y0), x1 - x0, y1 - y0, fill=None, edgecolor='m', linewidth=1))
-        ax.annotate("", xy=(x0, y1), xytext=(x1, y1),
-                    arrowprops=dict(arrowstyle='<->'))
-
-        if 'calibration-length' not in stats:
-            lengthx = '{:.0f} pixels'.format(x1 - x0)
-        else:
-            lengthx = '{:.2f} mm'.format(stats['width-calibrated'])
-
-        ax.text(0.5 * (x1 + x0), y1 + 20,
-                 lengthx,
-                 horizontalalignment='center', verticalalignment='top', fontsize=18)
-
-        if pois is not None:
-            for name, poi in pois:
-                ax.scatter(poi.col, poi.row, color='r')
-
-            for key, p0, p1 in pois.named_distances:
-                dist = stats[key]
-                unit = "px" if 'calibration-length' not in stats else "mm"
-                ax.annotate("", xy=(p0.col, p0.row), xytext=(p1.col, p1.row),
-                            arrowprops=dict(arrowstyle='<->'))
-                ax.text(x=(p0.col + p1.col)/2, y=(p0.row + p1.row)/2 + 15,
-                        s=f"{dist:.2f} {unit}",
-                        horizontalalignment='center',
-                        verticalalignment='top',
-                        fontsize=10,
-                )
-
-    plt.tight_layout()
-    return fig
-
 
 def imshow(ims):
 
@@ -63,9 +16,10 @@ def imshow(ims):
         ax = axs[np.unravel_index(i, axs.shape)]
 
         if isinstance(im, (list, tuple)):
-            alpha = 1 / len(im)
+            alpha = 1 / len([_im for _im in im if _im is not None])
             for _im, _cm in zip(im, cmap):
-                ax.imshow(_im, cmap=_cm, alpha=alpha)
+                if _im is not None:
+                    ax.imshow(_im, cmap=_cm, alpha=alpha)
         else:
             ax.imshow(im, cmap=cmap)
         ax.set_title(title)
@@ -81,9 +35,12 @@ def plot_interm(result: scalebar.Result):
     images = result.images
     im = result.images.original
 
-    ROI = scalebar.utils.hide_non_roi(images.binary, result.scalebar_size.value / 2, 127, location=result.scalebar_location)
+    ROI = scalebar.utils.hide_non_roi(images.binary, result.roi_fraction, 127,
+                                      location=result.scalebar_location)
     scalebar_crop = result.position.crop(images.equalized)
-    match_crop = result.position.crop(result.match)
+    match_crop = None
+    if result.match is not None:
+        match_crop = result.position.crop(result.match)
     px_per_mm = result.scale
 
 

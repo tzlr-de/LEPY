@@ -1,11 +1,28 @@
+reading:
+  rgb_regex: (.+)\.tif
+  uv_regex: (.+)uv\.tif
+  uv_channel_index: 0
+
+  extensions: [.jpg]
+  ordered: false
+
 segmentation:
-  method: "grabcut+otsu"
+  # method: "grabcut+otsu"
+  method: "unet"
+  channel: saturation
+  rescale: 0.5
+  ksize: null # no smoothing
+  fill_holes: False
+
 
 calibration:
   enabled: True
-  scalebar_size: MEDIUM # rough estimate of the scalebar size - SMALL: 10%, MEDIUM: 30%, or LARGE: 50% of the smallest dimension of the image
+  max_corners: 50
+  roi_fraction: 0.15
   square_size: 1.0 # in mm
-  position: bottom_left # position of the scalebar in the image
+  position: null # position of the scalebar in the image
+  template_path: scalebar_template.jpg
+  template_scale: 290.0 # in pixels per mm
 
 points_of_interest:
   enabled: True
