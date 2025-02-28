@@ -71,7 +71,7 @@ def _plot_boxplots(ax, channels, *, colors, titles, mask,
     ax.set_xticks(np.linspace(0, 256, 5*5), minor=True)
     ax.set_yticklabels(titles)
 
-def _plot_col_stats(ax, stats):
+def _plot_col_stats(ax, stats: ColorStats):
     ax.axis("off")
 
     rows = [[int(q25), int(median), int(q75), int(iqr), f"{shannon:.2f}", f"{simpson:.2f}"] for _, q25, q75, median, iqr, shannon, simpson in stats]
@@ -87,7 +87,7 @@ def _plot_col_stats(ax, stats):
     tab.set_fontsize(10)
     tab.scale(1, 1.5)
 
-def _plot_stats(ax: plt.Axes, stats):
+def _plot_stats(ax: plt.Axes, stats: dict):
     ax.axis("off")
     rows = []
     for key in [OUTS.poi.dist.inner_outer_l, OUTS.poi.dist.inner_outer_r,
@@ -111,7 +111,7 @@ def _plot_stats(ax: plt.Axes, stats):
     tab.set_fontsize(10)
     tab.scale(1, 1.5)
 
-def _plot_traits(ax, mask, contour, pois, stats):
+def _plot_traits(ax, mask, contour, pois, stats: dict):
     ax.axis("off")
 
     ax.imshow(mask)
@@ -195,7 +195,7 @@ class Plotter(BaseWriter):
     def plot(self, image: Image, *,
              pois: PointsOfInterest,
              calib_result: scalebar.Result,
-             col_stats: ColorStats
+             col_stat_binsize: int = 2,
              ) -> None:
 
         dest = self.new_path(image.rgb_path, ".png", subfolder="visualizations")
@@ -208,6 +208,7 @@ class Plotter(BaseWriter):
 
         fig = plt.figure(figsize=(16, 9))
         grid = plt.GridSpec(5, 8, figure=fig)
+        col_stats = image.color_stats(binsize=col_stat_binsize)
 
 
         if image.has_uv:

@@ -56,15 +56,11 @@ class Worker:
         self.callback(f"[{key}] Detecting points of interest")
         pois = image.pois(self.config.points_of_interest, scale=scale)
 
-        self.callback(f"[{key}] Estimating color statistics")
-        col_stats = image.color_stats(binsize=2)
-
         self.callback(f"[{key}] Plotting results")
         if self.plotter is not None:
             self.plotter.plot(image,
                               pois=pois,
                               calib_result=calib_result,
-                              col_stats=col_stats,
                             )
             if image.has_uv:
                 self.plotter.save_img(image.rgb_path, image.gbuv_im, subfolder="gbuv")
