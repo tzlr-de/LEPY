@@ -74,9 +74,9 @@ def _plot_boxplots(ax, channels, *, colors, titles, mask,
 def _plot_col_stats(ax, stats: ColorStats):
     ax.axis("off")
 
-    rows = [[int(q25), int(median), int(q75), int(iqr), f"{shannon:.2f}", f"{simpson:.2f}"] for _, q25, q75, median, iqr, shannon, simpson in stats]
+    rows = [[int(q25), int(median), int(q75), int(iqr), f"{shannon:.2f}"] for _, q25, q75, median, iqr, shannon, _ in stats]
     tab  = ax.table(cellText=rows,
-                colLabels=["Q25", "Median", "Q75", "IQR", "Shannon Idx", "Simpson Idx"],
+                colLabels=["Q25", "Median", "Q75", "IQR", "Shannon Index"],
                 colLoc="center",
                 cellLoc="center",
                 loc="center",
