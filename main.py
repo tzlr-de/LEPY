@@ -9,10 +9,12 @@ import logging
 from multiprocessing import Pool
 from tqdm.auto import tqdm
 
-import mothseg
 from mothseg import parser
 from mothseg import utils
 from mothseg.image import Image
+from mothseg.worker import Worker
+from mothseg.outputs.writer import OutputWriter
+from mothseg.outputs.writer import Plotter
 
 
 def proceed_check(yes: bool) -> bool:
@@ -56,9 +58,9 @@ def main(args):
     logging.info("Starting processing...")
     with tqdm(total=len(images)) as bar:
 
-        writer = mothseg.OutputWriter(output, config=args.config)
-        plotter = mothseg.Plotter(output, plot_interm=args.plot_interm)
-        worker = mothseg.Worker(config, plotter,
+        writer = OutputWriter(output, config=args.config)
+        plotter = Plotter(output, plot_interm=args.plot_interm)
+        worker = Worker(config, plotter,
                         progress_callback=None if pool is not None else bar.set_description,
                         raise_on_error=args.raise_on_error)
 
