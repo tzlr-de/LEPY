@@ -1,9 +1,12 @@
 import scalebar
 import numpy as np
 import cv2
+import git
+import datetime as dt
 
 from matplotlib import pyplot as plt
 
+import mothseg
 from mothseg import PointsOfInterest
 from mothseg import visualization as vis
 from mothseg.image import ColorStats
@@ -171,6 +174,20 @@ def _plot_scalebar(ax, calib_result):
     ys, xs = corners[~mask].transpose(1, 0)
     ax.scatter(xs, ys, marker="o", c="red", alpha=0.5)
 
+def _add_meta_info(ax, image_key: str):
+    try:
+        repo = git.Repo(search_parent_directories=True)
+        sha = repo.head.object.hexsha[:7]
+    except git.InvalidGitRepositoryError:
+        sha = "Not-a-git"
+    now = dt.datetime.now()
+    ax.set_title("\n".join(
+        [   f"Lepy v{mothseg.__version__}-{sha}",
+            f"Image: {image_key}",
+            f"{now:%d.%m.%Y %H:%M:%S}",
+        ]))
+
+
 class Plotter(BaseWriter):
 
     def __init__(self, folder: str, *, plot_interm: bool, save_contours: bool = True) -> None:
@@ -244,6 +261,7 @@ class Plotter(BaseWriter):
 
         _plot_traits        (plt.subplot(grid[ :2, 5:7 ]),
                              mask, image.contour, pois, image.stats)
+        _add_meta_info      (plt.subplot(grid[ :2, 5:7 ]), image.key)
         _plot_scalebar      (plt.subplot(grid[ :2, 7  ]),
                              calib_result)
         _plot_histograms    (plt.subplot(grid[2:4,  :5]),

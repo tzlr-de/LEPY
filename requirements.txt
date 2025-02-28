@@ -6,3 +6,4 @@ munch
 scalebar~=0.5.2
 cvargparse
 backgroundremover
+gitpython

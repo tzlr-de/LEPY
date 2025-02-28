@@ -14,3 +14,5 @@ __all__ = [
     "Worker",
     "Image",
 ]
+
+__version__ = "1.0.0"
