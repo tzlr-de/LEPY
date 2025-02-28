@@ -81,13 +81,16 @@ class Image:
     @property
     def intensity_im(self) -> np.ndarray:
 
-        gray_im, uv, mask = self.gray_im, self.uv_im, self.mask
+        uv, mask = self.uv_im, self.mask
         if mask is None:
-            mask = np.ones(gray_im.shape, dtype=np.uint8)
+            mask = np.ones(self.gray_im.shape, dtype=np.uint8)
+
         if uv is None:
-            return gray_im * mask
-        res = cv2.addWeighted(gray_im*mask, 0.5, uv*mask, 0.5, 0)
-        return res
+            return self.gray_im * mask
+
+
+        res = ((self.rgb_im * 0.25).sum(axis=-1) + uv * 0.25) * mask
+        return res.astype(np.uint8)
 
     @property
     def gbuv_im(self) -> np.ndarray:
