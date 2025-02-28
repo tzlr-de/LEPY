@@ -32,7 +32,7 @@ class Outputs:
     green: Statistic = _default(lambda: Statistic.new("green"))
     blue: Statistic = _default(lambda: Statistic.new("blue"))
     uv: Statistic = _default(lambda: Statistic.new("uv"))
-    black: Statistic = _default(lambda: Statistic.new("black"))
+    rgbuv: Statistic = _default(lambda: Statistic.new("rgbuv"))
 
     contour: Contour = _default(lambda: Contour())
     calibration: Calibration = _default(lambda: Calibration())
@@ -49,7 +49,7 @@ class Outputs:
             **self.green.key2name,
             **self.blue.key2name,
             **self.uv.key2name,
-            **self.black.key2name,
+            **self.rgbuv.key2name,
 
             self.contour.area: "Contour area",
             self.contour.width_calibrated: "Wing span",

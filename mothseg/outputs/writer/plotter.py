@@ -229,7 +229,7 @@ class Plotter(BaseWriter):
 
             channels = [R, G, B, uv, intensity_img]
             colors = ["red", "green", "blue", "purple", "gray"]
-            titles = [ "Red channel", "Green channel", "Blue channel", "UV channel", "B/W + UV image"]
+            titles = [ "Red channel", "Green channel", "Blue channel", "UV channel", "RGB-UV mixed"]
         else:
             channels = [R, G, B, intensity_img]
             colors = ["red", "green", "blue", "gray"]

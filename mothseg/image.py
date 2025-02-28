@@ -251,7 +251,7 @@ class Image:
         for channel, out_keys in zip(self.four_chan_im.transpose(2, 0, 1), [OUTS.red, OUTS.green, OUTS.blue, OUTS.uv]):
             compute(channel, out_keys)
 
-        compute(self.intensity_im, OUTS.black)
+        compute(self.intensity_im, OUTS.rgbuv)
 
         r, g, b, uv = self.chromaticity
         self.stats.update({

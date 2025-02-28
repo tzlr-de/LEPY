@@ -33,7 +33,7 @@ class OutputWriter(BaseWriter):
                 OUTPUTS.green.min, OUTPUTS.green.max, OUTPUTS.green.median, OUTPUTS.green.Q25, OUTPUTS.green.Q75, OUTPUTS.green.IQR, OUTPUTS.green.shannon, OUTPUTS.green.simpson,
                 OUTPUTS.blue.min, OUTPUTS.blue.max, OUTPUTS.blue.median, OUTPUTS.blue.Q25, OUTPUTS.blue.Q75, OUTPUTS.blue.IQR, OUTPUTS.blue.shannon, OUTPUTS.blue.simpson,
                 OUTPUTS.uv.min, OUTPUTS.uv.max, OUTPUTS.uv.median, OUTPUTS.uv.Q25, OUTPUTS.uv.Q75, OUTPUTS.uv.IQR, OUTPUTS.uv.shannon, OUTPUTS.uv.simpson,
-                OUTPUTS.black.min, OUTPUTS.black.max, OUTPUTS.black.median, OUTPUTS.black.Q25, OUTPUTS.black.Q75, OUTPUTS.black.IQR, OUTPUTS.black.shannon, OUTPUTS.black.simpson,
+                OUTPUTS.rgbuv.min, OUTPUTS.rgbuv.max, OUTPUTS.rgbuv.median, OUTPUTS.rgbuv.Q25, OUTPUTS.rgbuv.Q75, OUTPUTS.rgbuv.IQR, OUTPUTS.rgbuv.shannon, OUTPUTS.rgbuv.simpson,
 
                 OUTPUTS.luminance.min, OUTPUTS.luminance.max, OUTPUTS.luminance.median, OUTPUTS.luminance.mean, OUTPUTS.luminance.stddev,
                 OUTPUTS.chromaticity_red.min, OUTPUTS.chromaticity_red.max, OUTPUTS.chromaticity_red.median, OUTPUTS.chromaticity_red.mean, OUTPUTS.chromaticity_red.stddev,
