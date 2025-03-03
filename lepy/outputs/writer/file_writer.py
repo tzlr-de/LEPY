@@ -5,8 +5,8 @@ import datetime as dt
 
 from pathlib import Path
 
-from mothseg.outputs import OUTPUTS
-from mothseg.outputs.writer.base import BaseWriter
+from lepy.outputs import OUTPUTS
+from lepy.outputs.writer.base import BaseWriter
 
 class OutputWriter(BaseWriter):
 

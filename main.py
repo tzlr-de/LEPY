@@ -9,12 +9,12 @@ import logging
 from multiprocessing import Pool
 from tqdm.auto import tqdm
 
-from mothseg import parser
-from mothseg import utils
-from mothseg.image import Image
-from mothseg.worker import Worker
-from mothseg.outputs.writer import OutputWriter
-from mothseg.outputs.writer import Plotter
+from lepy import parser
+from lepy import utils
+from lepy.image import Image
+from lepy.worker import Worker
+from lepy.outputs.writer import OutputWriter
+from lepy.outputs.writer import Plotter
 
 
 def proceed_check(yes: bool) -> bool:

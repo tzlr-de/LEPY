@@ -1,8 +1,8 @@
-from mothseg.binarization.otsu import otsu
-from mothseg.binarization.gauss_local import gauss_local
-from mothseg.binarization.grabcut import stable_grabcut
-from mothseg.binarization.grabcut import grabcut
-from mothseg.binarization.unet import unet
+from lepy.binarization.otsu import otsu
+from lepy.binarization.gauss_local import gauss_local
+from lepy.binarization.grabcut import stable_grabcut
+from lepy.binarization.grabcut import grabcut
+from lepy.binarization.unet import unet
 
 def binarize(im, chan, method: str):
 

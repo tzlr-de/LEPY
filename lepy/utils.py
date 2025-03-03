@@ -10,7 +10,7 @@ from pathlib import Path
 from skimage import transform as tr
 from collections import defaultdict
 
-from mothseg.image import Image
+from lepy.image import Image
 
 def rescale(im, factor, **kwargs):
     if factor is None:

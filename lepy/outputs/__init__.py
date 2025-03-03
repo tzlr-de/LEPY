@@ -1,15 +1,15 @@
 from dataclasses import dataclass
 from dataclasses import field
 
-from mothseg.outputs.definitions import Size
-from mothseg.outputs.definitions import Statistic
-from mothseg.outputs.definitions import Contour
-from mothseg.outputs.definitions import Calibration
-from mothseg.outputs.definitions import PointsOfInterest
-from mothseg.outputs.definitions import Box
-from mothseg.outputs.definitions import Coord
-from mothseg.outputs.definitions import POIDist
-from mothseg.outputs.definitions import POIArea
+from lepy.outputs.definitions import Size
+from lepy.outputs.definitions import Statistic
+from lepy.outputs.definitions import Contour
+from lepy.outputs.definitions import Calibration
+from lepy.outputs.definitions import PointsOfInterest
+from lepy.outputs.definitions import Box
+from lepy.outputs.definitions import Coord
+from lepy.outputs.definitions import POIDist
+from lepy.outputs.definitions import POIArea
 
 
 def _default(factory):

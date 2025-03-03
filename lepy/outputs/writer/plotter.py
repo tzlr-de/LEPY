@@ -6,13 +6,13 @@ import datetime as dt
 
 from matplotlib import pyplot as plt
 
-import mothseg
-from mothseg import PointsOfInterest
-from mothseg import visualization as vis
-from mothseg.image import ColorStats
-from mothseg.image import Image
-from mothseg.outputs import OUTPUTS as OUTS
-from mothseg.outputs.writer.base import BaseWriter
+import lepy
+from lepy import PointsOfInterest
+from lepy import visualization as vis
+from lepy.image import ColorStats
+from lepy.image import Image
+from lepy.outputs import OUTPUTS as OUTS
+from lepy.outputs.writer.base import BaseWriter
 
 
 def _plot_images(ims, titles, grid, *, row: int, mask=None, cmaps=None):
@@ -74,12 +74,13 @@ def _plot_boxplots(ax, channels, *, colors, titles, mask,
     ax.set_xticks(np.linspace(0, 256, 5*5), minor=True)
     ax.set_yticklabels(titles)
 
-def _plot_col_stats(ax, stats: ColorStats):
+def _plot_col_stats(ax, stats: ColorStats, *, title):
     ax.axis("off")
+    ax.set_title(title)
 
     rows = [[int(q25), int(median), int(q75), int(iqr), f"{shannon:.2f}"] for _, q25, q75, median, iqr, shannon, _ in stats]
     tab  = ax.table(cellText=rows,
-                colLabels=["Q25", "Median", "Q75", "IQR", "Shannon Index"],
+                colLabels=["Q25", "Median\n$Brightness$", "Q75", "IQR\n$Contrast$", "Shannon Index"],
                 colLoc="center",
                 cellLoc="center",
                 loc="center",
@@ -90,8 +91,9 @@ def _plot_col_stats(ax, stats: ColorStats):
     tab.set_fontsize(10)
     tab.scale(1, 1.5)
 
-def _plot_stats(ax: plt.Axes, stats: dict):
+def _plot_stats(ax: plt.Axes, stats: dict, *, title: str):
     ax.axis("off")
+    ax.set_title(title)
     rows = []
     for key in [OUTS.poi.dist.inner_outer_l, OUTS.poi.dist.inner_outer_r,
                 OUTS.poi.dist.inner, OUTS.poi.dist.body,
@@ -174,7 +176,7 @@ def _plot_scalebar(ax, calib_result):
     ys, xs = corners[~mask].transpose(1, 0)
     ax.scatter(xs, ys, marker="o", c="red", alpha=0.5)
 
-def _add_meta_info(ax, image_key: str):
+def _add_meta_info(ax, image_key: str, *, add_time: bool = False):
     try:
         repo = git.Repo(search_parent_directories=True)
         sha = repo.head.object.hexsha[:7]
@@ -182,9 +184,9 @@ def _add_meta_info(ax, image_key: str):
         sha = "Not-a-git"
     now = dt.datetime.now()
     ax.set_title("\n".join(
-        [   f"Lepy v{mothseg.__version__}-{sha}",
-            f"Image: {image_key}",
-            f"{now:%d.%m.%Y %H:%M:%S}",
+        [   f"Lepy v{lepy.__version__}-{sha}",
+            f"{image_key}",
+            f"{now:%d.%m.%Y %H:%M:%S}" if add_time else f"{now:%d.%m.%Y}",
         ]))
 
 
@@ -267,13 +269,13 @@ class Plotter(BaseWriter):
         _plot_histograms    (plt.subplot(grid[2:4,  :5]),
                              col_stats.histograms, col_stats.bins[:-1],
                              colors=colors, titles=titles)
-        _plot_stats         (plt.subplot(grid[2:4, 5: ]),
-                             image.stats)
+        _plot_stats         (plt.subplot(grid[2:4, 5:7 ]),
+                             image.stats, title="Structural traits")
 
         _plot_boxplots      (plt.subplot(grid[4  ,  :5]),
                              channels, colors=colors, titles=titles, mask=mask)
         _plot_col_stats     (plt.subplot(grid[4  , 5: ]),
-                             col_stats)
+                             col_stats, title="Colour traits (selected)")
 
         plt.tight_layout()
 

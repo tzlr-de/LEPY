@@ -6,7 +6,7 @@ import scipy as sp
 from skimage import measure
 from dataclasses import dataclass
 
-from mothseg.outputs import OUTPUTS as OUTS
+from lepy.outputs import OUTPUTS as OUTS
 
 @dataclass
 class Point:

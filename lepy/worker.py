@@ -2,8 +2,8 @@ import cv2
 import numpy as np
 import typing as T
 
-from mothseg.outputs.writer import Plotter
-from mothseg.image import Image
+from lepy.outputs.writer import Plotter
+from lepy.image import Image
 
 class Worker:
     def __init__(self, config, plotter: Plotter = None, *,

@@ -3,9 +3,9 @@ import typing as T
 import numpy as np
 import scipy as sp
 
-from mothseg import utils
-from mothseg.binarization import binarize
-from mothseg.outputs import OUTPUTS as OUTS
+from lepy import utils
+from lepy.binarization import binarize
+from lepy.outputs import OUTPUTS as OUTS
 
 
 def segment(im, *, method: str = "grabcut+otsu",

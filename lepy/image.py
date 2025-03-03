@@ -8,9 +8,9 @@ from dataclasses import field
 from matplotlib.pyplot import imread
 
 import scalebar
-from mothseg.poi import PointsOfInterest
-from mothseg.outputs import OUTPUTS as OUTS
-from mothseg.outputs import Statistic
+from lepy.poi import PointsOfInterest
+from lepy.outputs import OUTPUTS as OUTS
+from lepy.outputs import Statistic
 
 
 @dataclass
@@ -139,7 +139,7 @@ class Image:
             self.uv_im = None
 
     def segment(self, config: T.Dict[str, T.Any] = None) -> dict:
-        from mothseg.segmentation import segment # due to circular import
+        from lepy.segmentation import segment # due to circular import
         im, uv = self.rgb_im, self.uv_im
         if config is None:
             self.mask = None
