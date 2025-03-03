@@ -29,20 +29,20 @@ def main(args):
     first10 = '\n'.join(map(str, list(images.keys())[:10]))
     logging.debug(f"Here are the first 10: \n{first10}")
 
-    if not proceed_check(args.yes):
+    if not proceed_check(args.yes or config.execution.proceed):
         logging.info("Execution aborted by the user!")
         return -1
 
     output = utils.check_output(args.output, src=args.folder,
                                 use_timestamp=args.use_timestamp,
-                                force=args.force
+                                force=args.force or config.execution.force,
                                 )
 
     if output is None:
         logging.info("No output folder selected, exiting script.")
         return -2
     else:
-        if not proceed_check(args.yes):
+        if not proceed_check(args.yes or config.execution.proceed):
             logging.info("Execution aborted by the user!")
             return -1
 

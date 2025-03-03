@@ -26,3 +26,11 @@ calibration:
 
 points_of_interest:
   enabled: True
+
+execution:
+  # if False, the asks for confirmation before proceeding
+  # can be overriden by the command line argument --yes/-y
+  proceed: True
+  # if True, the results are overwritten without asking
+  # can be overriden by the command line argument --force/-f
+  force: True
