@@ -42,7 +42,9 @@ def _plot_images(ims, titles, grid, *, row: int, mask=None, cmaps=None):
         _title_obj.set_color(title_color)
         ax.axis("off")
 
-def _plot_histograms(ax, histograms, bins, *, colors, titles, alpha=0.3):
+def _plot_histograms(ax, histograms, bins, *, colors, titles,
+                     alpha=0.3,
+                     xlim=256, xticks=5, xticks_minor=5):
     assert len(colors) == len(titles) == len(histograms), "Invalid input sizes!"
     for hist, col, title in zip(histograms, colors, titles):
         if hist is None:
@@ -50,9 +52,10 @@ def _plot_histograms(ax, histograms, bins, *, colors, titles, alpha=0.3):
         ax.plot(bins, hist, color=col, label=title)
         ax.fill_between(bins, hist, color=col, alpha=alpha)
 
-    ax.set_xlim(-1, 256)
-    ax.set_xticks(np.linspace(0, 256, 5))
-    ax.set_xticks(np.linspace(0, 256, 5*5), minor=True)
+    ax.set_xlim(-1, xlim)
+    ax.set_xticks(np.linspace(0, xlim, xticks))
+    if xticks_minor is not None:
+        ax.set_xticks(np.linspace(0, xlim, xticks*xticks_minor), minor=True)
     # ax.set_xlabel("Brightness")
     ax.legend()
 
@@ -60,6 +63,7 @@ def _plot_boxplots(ax, channels, *, colors, titles, mask,
                    median_color="yellow",
                    width=0.7,
                    showfliers=False,
+                   xlim=256, xticks=5, xticks_minor=5
                    ):
     for i, (chan, col) in enumerate(zip(channels, colors)):
         ax.boxplot(chan[mask != 0], patch_artist=True,
@@ -70,32 +74,52 @@ def _plot_boxplots(ax, channels, *, colors, titles, mask,
                    positions=[len(channels) - i],
                    showfliers=showfliers)
 
-    ax.set_xlim(-1, 256)
-    ax.set_xticks(np.linspace(0, 256, 5))
-    ax.set_xticks(np.linspace(0, 256, 5*5), minor=True)
+    ax.set_xlim(-1, xlim)
+    ax.set_xticks(np.linspace(0, xlim, xticks))
+    if xticks_minor is not None:
+        ax.set_xticks(np.linspace(0, xlim, xticks*xticks_minor), minor=True)
     ax.set_xlabel("Brightness")
+    # ax.set_yticklabels([t.replace(" ", "\n") for t in titles])
     ax.set_yticklabels(titles)
 
-def _plot_col_stats(ax, stats: ColorStats, *, title):
+def _plot_col_stats(ax, stats: ColorStats, *, colors, title):
     ax.axis("off")
     ax.set_title(title)
 
-    rows = [[int(q25), int(median), int(q75), int(iqr), f"{shannon:.2f}"] for _, q25, q75, median, iqr, shannon, _ in stats]
+    rows = [[ int(q25), int(median), int(q75), int(iqr), f"{shannon:.2f}"]
+                for _, q25, q75, median, iqr, shannon, _ in stats]
     tab  = ax.table(cellText=rows,
-                colLabels=["Q25", "Median\n$Brightness$", "Q75", "IQR\n$Contrast$", "Shannon Index"],
-                colLoc="center",
-                cellLoc="center",
-                loc="center",
-                edges="horizontal",
-                fontsize=72,
+                    cellColours=
+                    [
+                        [(colors[i], 0.5) for _ in range(len(rows[0]))]
+                            for i in range(0, len(rows))
+                    ],
+                    colLabels=["Q25", "Median\n$Brightness$", "Q75", "IQR\n$Contrast$", "Shannon Index"],
+                    colLoc="center",
+                    cellLoc="center",
+                    loc="center",
+                    edges="closed",
+                    fontsize=72,
                 )
     tab.auto_set_font_size(False)
     tab.set_fontsize(10)
     tab.scale(1, 1.5)
 
+
     cellDict = tab.get_celld()
     for i in range(len(rows[0])):
-        cellDict[(0, i)].set_height(.3)
+        cellDict[(0, i)].set_height(.35)
+
+    for c in cellDict.values():
+        c.set(linewidth=0)
+
+    # for i in range(len(rows)):
+    #     tab[i+1, 0].set_text_props(ha="left")
+
+    # for j in range(0, len(rows[0])):
+    #     for i in range(1, len(rows)):
+    #         tab[i, j].visible_edges = "open"
+    #     tab[len(rows), j].visible_edges = "B"
 
 def _plot_stats(ax: plt.Axes, stats: dict, *, title: str):
     ax.axis("off")
@@ -116,11 +140,19 @@ def _plot_stats(ax: plt.Axes, stats: dict, *, title: str):
                 edges="horizontal",
                 fontsize=72,
                 )
-    for i in range(len(rows)):
-        tab[i, 1].set_text_props(ha="right")
+    for row in range(len(rows)):
+        tab[row, 1].set_text_props(ha="right")
     tab.auto_set_font_size(False)
     tab.set_fontsize(10)
     tab.scale(1, 1.65)
+
+    for col in range(0, len(rows[0])):
+        tab[0, col].visible_edges = "T"
+        for row in range(1, len(rows)):
+            tab[row, col].visible_edges = "open"
+
+        tab[4, col].visible_edges = "B"
+        tab[len(rows)-1, col].visible_edges = "B"
 
 def _plot_struc_traits(ax, mask, contour, pois, stats: dict):
     ax.axis("off")
@@ -274,6 +306,7 @@ class Plotter(BaseWriter):
                      grid=grid,
                      row=1,
                      mask=mask)
+        xtick_params = dict(xlim=255, xticks=6, xticks_minor=5)
 
         _plot_struc_traits  (plt.subplot(grid[ :2, 5:7 ]),
                              im, image.contour, pois, image.stats)
@@ -283,14 +316,16 @@ class Plotter(BaseWriter):
 
         _plot_histograms    (plt.subplot(grid[2:4,  :5]),
                              col_stats.histograms, col_stats.bins[:-1],
-                             colors=colors, titles=titles)
+                             colors=colors, titles=titles,
+                             **xtick_params)
         _plot_stats         (plt.subplot(grid[2:4, 5:7 ]),
                              image.stats, title="Structural and selected colour traits")
 
         _plot_boxplots      (plt.subplot(grid[4: ,  :5]),
-                             channels, colors=colors, titles=titles, mask=mask)
+                             channels, colors=colors, titles=titles, mask=mask,
+                             **xtick_params)
         _plot_col_stats     (plt.subplot(grid[4: , 5: ]),
-                             col_stats, title="")
+                             col_stats, colors=colors, title="")
 
         plt.tight_layout()
 

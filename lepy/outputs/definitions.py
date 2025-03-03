@@ -23,6 +23,7 @@ class Box:
 @dataclass
 class Statistic:
     name: str
+    display_name: str
     median: str
     mean: str
     min: str
@@ -37,9 +38,10 @@ class Statistic:
     simpson: str
 
     @classmethod
-    def new(cls, name):
+    def new(cls, name, *, display_name=None):
         return cls(
             name=name,
+            display_name=display_name or name.capitalize(),
             median=f"{name}_median",
             mean=f"{name}_mean",
             min=f"{name}_min",

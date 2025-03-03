@@ -23,16 +23,16 @@ class Outputs:
     hue: Statistic = _default(lambda: Statistic.new("hue"))
 
     luminance: Statistic = _default(lambda: Statistic.new("luminance"))
-    chromaticity_red: Statistic = _default(lambda: Statistic.new("chrom_red"))
-    chromaticity_green: Statistic = _default(lambda: Statistic.new("chrom_green"))
-    chromaticity_blue: Statistic = _default(lambda: Statistic.new("chrom_blue"))
-    chromaticity_uv: Statistic = _default(lambda: Statistic.new("chrom_uv"))
+    chromaticity_red: Statistic = _default(lambda: Statistic.new("chrom_red", display_name="Chromaticity red"))
+    chromaticity_green: Statistic = _default(lambda: Statistic.new("chrom_green", display_name="Chromaticity green"))
+    chromaticity_blue: Statistic = _default(lambda: Statistic.new("chrom_blue", display_name="Chromaticity blue"))
+    chromaticity_uv: Statistic = _default(lambda: Statistic.new("chrom_uv", display_name="Chromaticity UV"))
 
     red: Statistic = _default(lambda: Statistic.new("red"))
     green: Statistic = _default(lambda: Statistic.new("green"))
     blue: Statistic = _default(lambda: Statistic.new("blue"))
-    uv: Statistic = _default(lambda: Statistic.new("uv"))
-    rgbuv: Statistic = _default(lambda: Statistic.new("rgbuv"))
+    uv: Statistic = _default(lambda: Statistic.new("uv", display_name="UV"))
+    rgbuv: Statistic = _default(lambda: Statistic.new("rgbuv", display_name="RGB-UV mixed"))
 
     contour: Contour = _default(lambda: Contour())
     calibration: Calibration = _default(lambda: Calibration())
