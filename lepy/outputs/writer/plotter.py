@@ -19,7 +19,7 @@ def _plot_images(ims, titles, grid, *, row: int, mask=None, cmaps=None):
     if cmaps is None:
         cmaps = [None] * len(ims)
 
-    suffix = "\n(masked)"
+    suffix = "\n$masked$"
     if mask is None:
         mask = 1
         suffix = ""
@@ -53,6 +53,7 @@ def _plot_histograms(ax, histograms, bins, *, colors, titles, alpha=0.3):
     ax.set_xlim(-1, 256)
     ax.set_xticks(np.linspace(0, 256, 5))
     ax.set_xticks(np.linspace(0, 256, 5*5), minor=True)
+    # ax.set_xlabel("Brightness")
     ax.legend()
 
 def _plot_boxplots(ax, channels, *, colors, titles, mask,
@@ -72,6 +73,7 @@ def _plot_boxplots(ax, channels, *, colors, titles, mask,
     ax.set_xlim(-1, 256)
     ax.set_xticks(np.linspace(0, 256, 5))
     ax.set_xticks(np.linspace(0, 256, 5*5), minor=True)
+    ax.set_xlabel("Brightness")
     ax.set_yticklabels(titles)
 
 def _plot_col_stats(ax, stats: ColorStats, *, title):
@@ -90,6 +92,10 @@ def _plot_col_stats(ax, stats: ColorStats, *, title):
     tab.auto_set_font_size(False)
     tab.set_fontsize(10)
     tab.scale(1, 1.5)
+
+    cellDict = tab.get_celld()
+    for i in range(len(rows[0])):
+        cellDict[(0, i)].set_height(.3)
 
 def _plot_stats(ax: plt.Axes, stats: dict, *, title: str):
     ax.axis("off")
@@ -114,9 +120,9 @@ def _plot_stats(ax: plt.Axes, stats: dict, *, title: str):
         tab[i, 1].set_text_props(ha="right")
     tab.auto_set_font_size(False)
     tab.set_fontsize(10)
-    tab.scale(1, 1.5)
+    tab.scale(1, 1.65)
 
-def _plot_traits(ax, mask, contour, pois, stats: dict):
+def _plot_struc_traits(ax, mask, contour, pois, stats: dict):
     ax.axis("off")
 
     ax.imshow(mask)
@@ -129,6 +135,7 @@ def _plot_traits(ax, mask, contour, pois, stats: dict):
     ax.annotate("", xy=(x0, y1), xytext=(x1, y1),
                 arrowprops=dict(arrowstyle='<->'))
 
+    bbox_props = dict(boxstyle="round,pad=0.3", fc=("white", 0.5), ec="white", lw=2)
     if OUTS.calibration.length not in stats:
         unit = "px"
         lengthx = '{:.0f} pixels'.format(x1 - x0)
@@ -136,9 +143,13 @@ def _plot_traits(ax, mask, contour, pois, stats: dict):
         unit = "mm"
         lengthx = '{:.2f} mm'.format(stats[OUTS.contour.width_calibrated])
 
-    ax.text(0.5 * (x1 + x0), y1 + 20,
-                lengthx,
-                horizontalalignment='center', verticalalignment='top', fontsize=18)
+    ax.text(0.5 * (x1 + x0), y1,
+            lengthx,
+            horizontalalignment='center',
+            verticalalignment='top',
+            fontsize=18,
+            bbox=bbox_props,
+    )
 
     if pois is None:
         return
@@ -155,10 +166,12 @@ def _plot_traits(ax, mask, contour, pois, stats: dict):
                 horizontalalignment='center',
                 verticalalignment='top',
                 fontsize=10,
+                bbox=bbox_props,
         )
 
 def _plot_scalebar(ax, calib_result):
-    ax.axis("off")
+    # ax.axis("off")
+    ax.grid(True)
     ax.imshow(calib_result.scalebar, cmap=plt.cm.gray)
     ax.set_title(f"Detected scalebar: \n{calib_result.scale:.2f} px/mm")
 
@@ -176,18 +189,20 @@ def _plot_scalebar(ax, calib_result):
     ys, xs = corners[~mask].transpose(1, 0)
     ax.scatter(xs, ys, marker="o", c="red", alpha=0.5)
 
-def _add_meta_info(ax, image_key: str, *, add_time: bool = False):
+def _add_meta_info(fig, ax, image_key: str, *, add_time: bool = False):
     try:
         repo = git.Repo(search_parent_directories=True)
         sha = repo.head.object.hexsha[:7]
     except git.InvalidGitRepositoryError:
         sha = "Not-a-git"
     now = dt.datetime.now()
-    ax.set_title("\n".join(
+    title = " | ".join(
         [   f"Lepy v{lepy.__version__}-{sha}",
             f"{image_key}",
             f"{now:%d.%m.%Y %H:%M:%S}" if add_time else f"{now:%d.%m.%Y}",
-        ]))
+        ])
+    # ax.set_title(title)
+    fig.suptitle(title)
 
 
 class Plotter(BaseWriter):
@@ -248,34 +263,34 @@ class Plotter(BaseWriter):
 
             channels = [R, G, B, uv, intensity_img]
             colors = ["red", "green", "blue", "purple", "gray"]
-            titles = [ "Red channel", "Green channel", "Blue channel", "UV channel", "RGB-UV mixed"]
+            titles = [ "Red", "Green", "Blue", "UV", "RGB-UV mixed"]
         else:
             channels = [R, G, B, intensity_img]
             colors = ["red", "green", "blue", "gray"]
-            titles = ["Red channel", "Green channel", "Blue channel", "B/W image"]
+            titles = ["Red", "Green", "Blue", "B/W image"]
 
         _plot_images(ims=channels,
                      titles=list(zip(titles, colors)),
                      grid=grid,
-                    #  cmaps=["Reds", "Greens", "Blues", "Purples", "gray"],
                      row=1,
                      mask=mask)
 
-        _plot_traits        (plt.subplot(grid[ :2, 5:7 ]),
-                             mask, image.contour, pois, image.stats)
-        _add_meta_info      (plt.subplot(grid[ :2, 5:7 ]), image.key)
+        _plot_struc_traits  (plt.subplot(grid[ :2, 5:7 ]),
+                             im, image.contour, pois, image.stats)
+        _add_meta_info      (fig, plt.subplot(grid[ :2, 5:7 ]), image.key)
         _plot_scalebar      (plt.subplot(grid[ :2, 7  ]),
                              calib_result)
+
         _plot_histograms    (plt.subplot(grid[2:4,  :5]),
                              col_stats.histograms, col_stats.bins[:-1],
                              colors=colors, titles=titles)
         _plot_stats         (plt.subplot(grid[2:4, 5:7 ]),
-                             image.stats, title="Structural traits")
+                             image.stats, title="Structural and selected colour traits")
 
-        _plot_boxplots      (plt.subplot(grid[4  ,  :5]),
+        _plot_boxplots      (plt.subplot(grid[4: ,  :5]),
                              channels, colors=colors, titles=titles, mask=mask)
-        _plot_col_stats     (plt.subplot(grid[4  , 5: ]),
-                             col_stats, title="Colour traits (selected)")
+        _plot_col_stats     (plt.subplot(grid[4: , 5: ]),
+                             col_stats, title="")
 
         plt.tight_layout()
 
