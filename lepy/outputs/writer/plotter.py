@@ -264,7 +264,7 @@ class Plotter(BaseWriter):
              col_stat_binsize: int = 2,
              ) -> None:
 
-        dest = self.new_path(image.rgb_path, ".png", subfolder="visualizations")
+        dest = self.new_path(image.rgb_path, ".png", subfolder="visualisations")
         im, uv, mask = image.rgb_im, image.uv_im, image.mask
 
         self.save_contour(image, subfolder="contours")

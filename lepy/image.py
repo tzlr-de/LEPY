@@ -105,7 +105,7 @@ class Image:
 
     @property
     def luminance(self) -> np.ndarray:
-        """ Returns the luminance of the image. """
+        """ Returns the luminance of the image. TODO: do we need gamma correction? see https://stackoverflow.com/a/56678483 """
         R, G, B = self.rgb_im.transpose(2, 0, 1)
         return 0.2126 * R + 0.7152 * G + 0.0722 * B
 
@@ -285,7 +285,7 @@ def shannon_index(data: np.ndarray, *, bins: int = 256) -> float:
     p = _channel_distribution(data, bins=bins)
     max_diversity = np.log(bins)
     p = p[p != 0]
-    return -np.sum(p * np.log(p) / max_diversity)
+    return -np.sum(p * np.log(p)) / max_diversity
 
 def simpson_index(data: np.ndarray, *, bins: int = 256) -> float:
     """ Computes Simpson index of the data. """
