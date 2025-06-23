@@ -8,7 +8,8 @@ reading:
 
 segmentation:
   # method: "grabcut+otsu"
-  method: "unet"
+  # grabcut+otsu, grabcut, otsu, flatbug, unet
+  method: "flatbug"
   channel: saturation
   rescale: 0.5
   ksize: null # no smoothing

@@ -39,7 +39,7 @@ The pipeline also creates a new image, which combines the UV channel with Green 
 | <img src="examples/example.jpg"> | <img src="examples/uv_red.jpg"> | <img src="examples/gbuv.jpg"> |
 
 ## Installation
-*tested on python>=3.9*
+*tested on python>=3.11*
 
 We recommend using a virtual environment (either with [`venv`](https://docs.python.org/3/library/venv.html) or with [`conda`](https://www.anaconda.com/docs/getting-started/miniconda/install)) to install the required packages (listed in `requirements.txt`).
 ```bash

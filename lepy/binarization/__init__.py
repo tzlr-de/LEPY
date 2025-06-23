@@ -3,6 +3,7 @@ from lepy.binarization.gauss_local import gauss_local
 from lepy.binarization.grabcut import stable_grabcut
 from lepy.binarization.grabcut import grabcut
 from lepy.binarization.unet import unet
+from lepy.binarization.flatbug import flatbug
 
 def binarize(im, chan, method: str):
 
@@ -20,6 +21,9 @@ def binarize(im, chan, method: str):
 
     elif method == "unet":
         return unet(im)
+
+    elif method == "flatbug":
+        return flatbug(im)
 
     else:
         raise ValueError(f"Unknown method: {method}!")

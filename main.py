@@ -22,6 +22,8 @@ def proceed_check(yes: bool) -> bool:
 
 
 def main(args):
+    logger = logging.getLogger()
+    logger.setLevel(args.loglevel.upper()) #getattr(logging, args.loglevel.upper(), logging.INFO))
     config = utils.read_config(args.config)
     images = utils.find_images(args.folder, config=config.reading)
 

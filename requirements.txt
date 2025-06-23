@@ -12,3 +12,5 @@ gitpython==3.1.44
 # to avoid conflicts
 numpy==2.0.2
 opencv-python-headless==4.11.0.86
+
+-e git+https://github.com/darsa-group/flat-bug.git@9093de0f89756b7f59e63f3bd7161f5574eb90ac#egg=flat_bug
