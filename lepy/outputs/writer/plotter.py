@@ -154,7 +154,8 @@ def _plot_stats(ax: plt.Axes, stats: dict, *, title: str):
         tab[4, col].visible_edges = "B"
         tab[len(rows)-1, col].visible_edges = "B"
 
-def _plot_struc_traits(ax, mask, contour, pois, stats: dict):
+def _plot_struc_traits(ax, mask, contour, pois, stats: dict,
+                       calib_result: scalebar.Result):
     ax.axis("off")
 
     ax.imshow(mask)
@@ -163,6 +164,17 @@ def _plot_struc_traits(ax, mask, contour, pois, stats: dict):
     x0, y0, x1, y1 = [stats[coord] for coord in [OUTS.contour.xmin, OUTS.contour.ymin, OUTS.contour.xmax, OUTS.contour.ymax]]
     ax.add_patch(plt.Rectangle((x0, y0), x1 - x0, y1 - y0, fill=None,
                                edgecolor='m', linewidth=2))
+
+    if calib_result.position is not None:
+        xy = (calib_result.position.x, calib_result.position.y)
+        width = calib_result.position.width
+        height = calib_result.position.height
+
+        ax.add_patch(plt.Rectangle(xy, width, height, fill=None,
+                                   edgecolor='black',
+                                   linewidth=1, linestyle='--'
+                                   ))
+
 
     ax.annotate("", xy=(x0, y1), xytext=(x1, y1),
                 arrowprops=dict(arrowstyle='<->'))
@@ -201,7 +213,7 @@ def _plot_struc_traits(ax, mask, contour, pois, stats: dict):
                 bbox=bbox_props,
         )
 
-def _plot_scalebar(ax, calib_result):
+def _plot_scalebar(ax, calib_result: scalebar.Result):
     # ax.axis("off")
     ax.grid(True)
     ax.imshow(calib_result.scalebar, cmap=plt.cm.gray)
@@ -309,7 +321,8 @@ class Plotter(BaseWriter):
         xtick_params = dict(xlim=255, xticks=6, xticks_minor=5)
 
         _plot_struc_traits  (plt.subplot(grid[ :2, 5:7 ]),
-                             im, image.contour, pois, image.stats)
+                             im, image.contour, pois, image.stats,
+                             calib_result)
         _add_meta_info      (fig, plt.subplot(grid[ :2, 5:7 ]), image.key)
         _plot_scalebar      (plt.subplot(grid[ :2, 7  ]),
                              calib_result)
