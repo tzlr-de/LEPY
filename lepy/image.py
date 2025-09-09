@@ -11,6 +11,7 @@ import scalebar
 from lepy.poi import PointsOfInterest
 from lepy.outputs import OUTPUTS as OUTS
 from lepy.outputs import Statistic
+from scalebar.core.estimation import Template
 
 
 @dataclass
@@ -169,8 +170,7 @@ class Image:
             scalebar_location = scalebar.Position.get(config.position)
 
         res = scalebar.Result.new(self.rgb_path,
-                                  template_path=config.template_path,
-                                  template_scale=config.template_scale,
+                                  template=Template(path=config.template_path, scale=config.template_scale),
                                   roi_fraction=config.roi_fraction,
                                   max_corners=config.max_corners,
                                   size_per_square=config.square_size,
@@ -181,6 +181,7 @@ class Image:
         stats = self.stats
         if scale is not None and scale > 0:
             stats[OUTS.calibration.length] = scale
+            stats[OUTS.calibration.score] = res.template.match_score
             stats[OUTS.calibration.pos.x] = int(res.position.x)
             stats[OUTS.calibration.pos.y] = int(res.position.y)
             stats[OUTS.calibration.pos.w] = int(res.position.width)

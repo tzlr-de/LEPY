@@ -49,6 +49,7 @@ class OutputWriter(BaseWriter):
                 OUTPUTS.contour.height_calibrated,
 
                 OUTPUTS.calibration.length,
+                OUTPUTS.calibration.score,
                 OUTPUTS.calibration.pos.x, OUTPUTS.calibration.pos.y,
                 OUTPUTS.calibration.pos.w, OUTPUTS.calibration.pos.h,
 

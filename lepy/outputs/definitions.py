@@ -126,4 +126,5 @@ class Contour:
 @dataclass
 class Calibration:
     length: str = "calibration_length"
+    score: str = "calibration_score"
     pos: Box = field(default_factory=lambda: Box(x="calibration_pos_x", y="calibration_pos_y", w="calibration_pos_w", h="calibration_pos_h"))
