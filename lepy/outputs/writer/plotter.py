@@ -332,7 +332,7 @@ class Plotter(BaseWriter):
                              colors=colors, titles=titles,
                              **xtick_params)
         _plot_stats         (plt.subplot(grid[2:4, 5:7 ]),
-                             image.stats, title="Structural and selected colour traits")
+                             image.stats, title="Morphological and selected colour traits")
 
         _plot_boxplots      (plt.subplot(grid[4: ,  :5]),
                              channels, colors=colors, titles=titles, mask=mask,
