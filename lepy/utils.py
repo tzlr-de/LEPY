@@ -2,6 +2,7 @@ import os
 import yaml
 import re
 import munch
+import json
 import logging
 import datetime as dt
 import typing as T
@@ -18,9 +19,18 @@ def rescale(im, factor, **kwargs):
     dest_dtype = im.dtype
     return tr.rescale(im, factor, order=0, preserve_range=True, **kwargs).astype(dest_dtype)
 
+def read_key_points(path: T.Optional[str]) -> T.Optional[dict]:
+    if path is None:
+        return None
 
-def find_images(folder, *, config) -> dict:
+    with open(path) as f:
+        content = json.load(f)
+
+    return {item['Code']: item for item in content}
+
+def find_images(folder, *, config, key_points_file) -> dict:
     res = defaultdict(Image)
+    key_points = read_key_points(key_points_file)
 
     rgb_regex = re.compile(config.rgb_regex)
     uv_regex = re.compile(config.uv_regex)
@@ -57,6 +67,9 @@ def find_images(folder, *, config) -> dict:
                     curr_file.root = Path(root)
                 curr_file.rgb_fname = name
 
+            kp_key = Path(curr_file.rgb_fname).stem if curr_file.rgb_fname is not None else Path(curr_file.uv_fname).stem
+            if key_points is not None and kp_key in key_points:
+                curr_file.key_points = key_points[kp_key]
 
     if config.ordered:
         raise NotImplementedError("Ordered image loading is not implemented yet.")

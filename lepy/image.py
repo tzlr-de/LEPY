@@ -51,6 +51,8 @@ class Image:
     chan: np.ndarray = None
     contour: np.ndarray = None
 
+    key_points: T.Optional[dict] = None
+
     stats: dict = field(default_factory=dict)
 
     @property
@@ -195,9 +197,14 @@ class Image:
     def pois(self, config: T.Dict[str, T.Any], scale: T.Optional[float] = None) -> T.Optional[PointsOfInterest]:
         if not config.enabled:
             return
+
         cont_arr = np.zeros_like(self.mask)
         cont_arr = cv2.drawContours(cont_arr, [self.contour], 0, 1, -1)
-        pois = PointsOfInterest.detect(cont_arr)
+
+        if self.key_points is None:
+            pois = PointsOfInterest.detect(cont_arr)
+        else:
+            pois = PointsOfInterest.from_keypoints(cont_arr, key_points=self.key_points)
 
         self.stats.update(pois.stats)
         self.stats.update(pois.distances(scale=scale))

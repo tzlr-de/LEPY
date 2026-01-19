@@ -46,6 +46,10 @@ class Point:
     def __array__(self, dtype=None):
         return np.array([self.row, self.col])
 
+    def __post_init__(self):
+        self.row = int(self.row)
+        self.col = int(self.col)
+
 
 @dataclass
 class PointsOfInterest:
@@ -162,20 +166,47 @@ class PointsOfInterest:
             (OUTS.poi.dist.inner_outer_r, self.inner_top_r, self.outer_r),
         ]
 
+    @staticmethod
+    def _split_picture(binary_im):
+
+        middle = split_picture(binary_im)
+
+        # Centroid of central column
+        middle_arr = binary_im[:, middle]
+        middle_y = int(np.mean(np.argwhere(middle_arr)))
+        body_center = Point(middle_y, middle)
+        return middle, body_center
+
+    @classmethod
+    def from_keypoints(cls, bin_im, key_points: dict) -> PointsOfInterest:
+
+        H, W, *_ = bin_im.shape
+        _, body_center = cls._split_picture(bin_im)
+
+        return PointsOfInterest(
+            width=W,
+            height=H,
+            center=body_center,
+            body_top=Point(key_points[OUTS.poi.body_top.y], key_points[OUTS.poi.body_top.x]),
+            body_bot=Point(key_points[OUTS.poi.body_bot.y], key_points[OUTS.poi.body_bot.x]),
+
+            outer_l=Point(key_points[OUTS.poi.outer_l.y], key_points[OUTS.poi.outer_l.x]),
+            outer_r=Point(key_points[OUTS.poi.outer_r.y], key_points[OUTS.poi.outer_r.x]),
+
+            inner_top_l=Point(key_points[OUTS.poi.inner_top_l.y], key_points[OUTS.poi.inner_top_l.x]),
+            inner_top_r=Point(key_points[OUTS.poi.inner_top_r.y], key_points[OUTS.poi.inner_top_r.x]),
+
+            inner_bot_l=Point(key_points[OUTS.poi.inner_bot_l.y], key_points[OUTS.poi.inner_bot_l.x]),
+            inner_bot_r=Point(key_points[OUTS.poi.inner_bot_r.y], key_points[OUTS.poi.inner_bot_r.x]),
+        )
+
     @classmethod
     def detect(cls, bin_im: np.ndarray) -> PointsOfInterest:
         H, W, *C = bin_im.shape
-        middle = split_picture(bin_im)
-
-        binary_left = bin_im[:, :middle]
-        binary_right = bin_im[:, middle:]
-
-        # Centroid of central column
-        middle_arr = bin_im[:, middle]
-        middle_y = int(np.mean(np.argwhere(middle_arr)))
-        body_center = Point(middle_y, middle)
+        middle, body_center = cls._split_picture(bin_im)
 
         # Left wing
+        binary_left = bin_im[:, :middle]
         without_antenna_l = remove_antenna(binary_left)
         outer_pix_l = detect_outer_pix(without_antenna_l, body_center)
         inner_top_l = detect_inner_pix(without_antenna_l, outer_pix_l, 'l')
@@ -183,8 +214,9 @@ class PointsOfInterest:
         inner_bot_l = detect_inner_bottom(without_antenna_l, inner_top_l, 'l')
 
         # Right wing
-        body_center_r = Point(middle_y, 0)  # to calculate outer_pix_r correctly
+        binary_right = bin_im[:, middle:]
         without_antenna_r = remove_antenna(binary_right)
+        body_center_r = Point(body_center.row, 0)  # to calculate outer_pix_r correctly
         outer_r = detect_outer_pix(without_antenna_r, body_center_r)
         inner_top_r = detect_inner_pix(without_antenna_r, outer_r, 'r')
         inner_bot_r = detect_inner_bottom(without_antenna_r, inner_top_r, 'r')

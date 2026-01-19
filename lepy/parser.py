@@ -8,6 +8,9 @@ def parse_args():
 
         Arg("--output", "-o"),
 
+
+        Arg("--key_points", "-kp",
+            help="JSON file with key points (either manually annotated or updated results of LEPY using rePOInt)"),
         Arg.flag("--yes", "-y"),
         Arg.flag("--force", "-f"),
 

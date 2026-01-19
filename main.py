@@ -25,7 +25,7 @@ def main(args):
     logger = logging.getLogger()
     logger.setLevel(args.loglevel.upper()) #getattr(logging, args.loglevel.upper(), logging.INFO))
     config = utils.read_config(args.config)
-    images = utils.find_images(args.folder, config=config.reading)
+    images = utils.find_images(args.folder, config=config.reading, key_points_file=args.key_points)
 
     logging.info(f"Found {len(images):,d} images in {args.folder}")
     first10 = '\n'.join(map(str, list(images.keys())[:10]))
